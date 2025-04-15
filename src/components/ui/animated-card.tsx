@@ -1,7 +1,7 @@
 "use client";
-import { animate, motion } from "motion/react";
-import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { animate, motion } from "motion/react";
+import React, { useEffect } from "react";
 
 export function CardDemo() {
 	return (
@@ -70,7 +70,7 @@ const Skeleton = () => {
 
 	useEffect(() => {
 		animate(sequence, {
-			// @ts-ignore
+			// @ts-expect-error repeat issue
 			repeat: Infinity,
 			repeatDelay: 1,
 		});

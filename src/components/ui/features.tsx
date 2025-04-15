@@ -1,10 +1,9 @@
-import React from "react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { useEffect, useRef } from "react";
-import { motion } from "motion/react";
 import { IconBrandYoutubeFilled, IconGlobe } from "@tabler/icons-react";
+import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 export function FeaturesSectionDemo() {
 	const features = [

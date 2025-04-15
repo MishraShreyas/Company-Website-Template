@@ -10,8 +10,8 @@ interface ArcadeButtonProps
 const ArcadeButton = ({
 	children,
 	className = "",
-	...props
-}: ArcadeButtonProps) => {
+}: // ...props
+ArcadeButtonProps) => {
 	return (
 		<motion.button
 			className={`p-1 relative ${className}`}

@@ -1,20 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import {
-	Button,
-	Input,
 	addToast,
+	Button,
 	Card,
 	CardBody,
 	CardFooter,
 	CardHeader,
+	Input,
 } from "@heroui/react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 // import { PlaceholderLogo } from "@/components/core/PlaceholderLogo"; // Create this
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -54,12 +53,16 @@ export default function LoginPage() {
 				title: "Login Successful",
 				description: "Welcome back!",
 			});
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.error("Login failed:", err);
-			setError(err.message || "Invalid email or password.");
+			const errorMessage =
+				err instanceof Error
+					? err.message
+					: "Invalid email or password.";
+			setError(errorMessage);
 			addToast({
 				title: "Login Failed",
-				description: err.message || "Invalid email or password.",
+				description: errorMessage,
 				color: "danger",
 			});
 		} finally {

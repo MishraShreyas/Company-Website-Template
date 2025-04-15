@@ -1,18 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "motion/react";
-import { BackgroundBeamsWithCollision } from "@/components/ui/beams";
-import GlitchImage from "@/components/ui/glitch-image";
-import { HoverCard } from "@/components/ui/hover-card";
-import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
-import { useEffect } from "react";
-import { addToast } from "@heroui/react";
-import { title } from "process";
-import { FeaturesSectionDemo } from "@/components/ui/features";
 import { Footer } from "@/components/layout/Footer";
 import ArcadeButton from "@/components/ui/arcade-button";
+import { BackgroundBeamsWithCollision } from "@/components/ui/beams";
 import { BGCard } from "@/components/ui/bg-card";
+import { FeaturesSectionDemo } from "@/components/ui/features";
+import GlitchImage from "@/components/ui/glitch-image";
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+import { motion } from "motion/react";
 
 export default function Page() {
 	const aboutUsWords = [

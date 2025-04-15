@@ -1,5 +1,3 @@
-import { Timestamp } from "firebase/firestore";
-
 export type UserRole = "admin" | "employee" | "manager"; // Add more roles as needed
 
 export interface UserProfile {
@@ -9,7 +7,7 @@ export interface UserProfile {
 	photoURL?: string | null;
 	role: UserRole;
 	managerId?: string | null; // Reference to manager's UID
-	createdAt: Timestamp;
+	createdAt: Date;
 	// Add other profile fields as needed
 }
 
@@ -23,9 +21,9 @@ export interface Task {
 	status: TaskStatus;
 	assignedTo: string; // User UID
 	createdBy: string; // User UID
-	dueDate: Timestamp;
-	createdAt: Timestamp;
-	updatedAt: Timestamp;
+	dueDate: Date;
+	createdAt: Date;
+	updatedAt: Date;
 	priority?: "low" | "medium" | "high";
 	tags: string[]; // Array of tags for categorization
 }
@@ -36,13 +34,13 @@ export interface LeaveRequest {
 	id: string;
 	userId: string; // User UID
 	userName?: string; // Denormalized for easy display in admin panel
-	startDate: Timestamp;
-	endDate: Timestamp;
+	startDate: Date;
+	endDate: Date;
 	reason: string;
 	status: LeaveStatus;
-	requestedAt: Timestamp;
+	requestedAt: Date;
 	reviewedBy?: string | null; // Admin/Manager UID
-	reviewedAt?: Timestamp | null;
+	reviewedAt?: Date | null;
 }
 
 export interface Interview {
@@ -51,10 +49,10 @@ export interface Interview {
 	candidateEmail: string;
 	interviewerId: string; // User UID
 	interviewerName?: string; // Denormalized
-	scheduledTime: Timestamp;
+	scheduledTime: Date;
 	status: "scheduled" | "completed" | "cancelled";
 	notes?: string;
-	createdAt: Timestamp;
+	createdAt: Date;
 	createdBy: string; // User UID
 }
 
@@ -63,7 +61,7 @@ export interface ActivityLog {
 	userId: string;
 	userName?: string; // Denormalized
 	action: "login" | "logout";
-	timestamp: Timestamp;
+	timestamp: Date;
 	ipAddress?: string; // Consider privacy implications
 }
 
@@ -79,7 +77,7 @@ export interface Notification {
 		| "generic";
 	relatedDocId?: string; // e.g., task ID, leave request ID
 	isRead: boolean;
-	createdAt: Timestamp;
+	createdAt: Date;
 }
 
 // Interface for Kanban Columns

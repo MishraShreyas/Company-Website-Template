@@ -1,24 +1,17 @@
 "use client";
 
-import React, {
-	createContext,
-	useContext,
-	useState,
-	useEffect,
-	ReactNode,
-} from "react";
-import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
-import {
-	doc,
-	getDoc,
-	setDoc,
-	serverTimestamp,
-	collection,
-	addDoc,
-} from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { UserProfile, UserRole, ActivityLog } from "@/lib/types";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner"; // Create this component
+import { auth, db } from "@/lib/firebase";
+import { ActivityLog, UserProfile } from "@/lib/types";
+import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+	createContext,
+	ReactNode,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 
 interface AuthContextProps {
 	user: FirebaseUser | null;
@@ -41,7 +34,7 @@ const logActivity = async (
 			userId,
 			userName: userName || "Unknown",
 			action,
-			timestamp: serverTimestamp() as any, // Cast needed until Firestore types improve
+			timestamp: new Date(), // Cast needed until Firestore types improve
 			// ipAddress: // Fetch IP if needed (server-side recommended for accuracy/privacy)
 		};
 		await addDoc(collection(db, "activityLogs"), logEntry);
@@ -92,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 							firebaseUser.email?.split("@")[0] ||
 							"New User",
 						role: "employee", // Default role
-						createdAt: serverTimestamp() as any, // Cast needed
+						createdAt: new Date(), // Cast needed
 						// photoURL: firebaseUser.photoURL, // Optional
 					};
 					try {
