@@ -1,29 +1,30 @@
 "use client";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import {
+	MobileNav,
+	MobileNavHeader,
+	MobileNavMenu,
+	MobileNavToggle,
 	Navbar,
+	NavbarButton,
+	NavbarLogo,
 	NavBody,
 	NavItems,
-	MobileNav,
-	NavbarLogo,
-	NavbarButton,
-	MobileNavHeader,
-	MobileNavToggle,
-	MobileNavMenu,
 } from "@/components/ui/navbar";
 import { useState } from "react";
 
 const NAV_ITEMS = [
 	{
-		name: "Features",
-		link: "#features",
+		name: "Dev Blog",
+		link: "/dev-log",
 	},
 	{
-		name: "Pricing",
-		link: "#pricing",
+		name: "Games",
+		link: "/games",
 	},
 	{
-		name: "Contact",
-		link: "#contact",
+		name: "Careers",
+		link: "/careers",
 	},
 ];
 
@@ -38,9 +39,10 @@ export function Header({ children }: { children: React.ReactNode }) {
 					<NavbarLogo />
 					<NavItems items={NAV_ITEMS} />
 					<div className="flex items-center gap-4">
-						<NavbarButton variant="secondary">Login</NavbarButton>
+						<ThemeSwitcher />
+						{/* <NavbarButton variant="secondary">Login</NavbarButton> */}
 						<NavbarButton variant="primary">
-							Book a call
+							Contact Us
 						</NavbarButton>
 					</div>
 				</NavBody>

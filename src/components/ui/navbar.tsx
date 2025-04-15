@@ -236,9 +236,9 @@ export const NavbarLogo = () => {
 			href="/"
 			className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
 		>
-			<Image src="vercel.svg" alt="logo" width={30} height={30} />
-			<span className="font-medium text-black dark:text-white">
-				Startup
+			{/* <Image src="vercel.svg" alt="logo" width={30} height={30} /> */}
+			<span className="font-extrabold text-black dark:text-white font-mono text-xl">
+				Obelithe
 			</span>
 		</Link>
 	);

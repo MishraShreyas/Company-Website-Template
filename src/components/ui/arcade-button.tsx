@@ -42,7 +42,7 @@ const ArcadeButton = ({
 					ease: "easeInOut",
 				}}
 			/>
-			<div className="px-8 py-2 bg-black rounded-md relative group transition duration-200 text-white hover:bg-transparent">
+			<div className="px-8 py-2 dark:bg-black bg-white rounded-md relative group transition duration-200 dark:text-white text-black hover:bg-transparent">
 				{children}
 			</div>
 		</motion.button>

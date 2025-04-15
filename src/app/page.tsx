@@ -12,6 +12,7 @@ import { title } from "process";
 import { FeaturesSectionDemo } from "@/components/ui/features";
 import { Footer } from "@/components/layout/Footer";
 import ArcadeButton from "@/components/ui/arcade-button";
+import { BGCard } from "@/components/ui/bg-card";
 
 export default function Page() {
 	const aboutUsWords = [
@@ -28,7 +29,7 @@ export default function Page() {
 			text: "at",
 		},
 		{
-			text: "[Brand].",
+			text: "Obelithe.",
 			className:
 				"bg-gradient-to-r from-indigo-500 to-purple-500 inline-block text-transparent dark:text-transparent bg-clip-text",
 		},
@@ -48,7 +49,7 @@ export default function Page() {
 				</div>
 				<div className="px-4 py-10 md:py-20">
 					<h1 className="relative z-10 mx-auto max-w-4xl text-center text-2xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
-						{"Launch your website in hours, not days"
+						{"An Indie Game Studio based in India"
 							.split(" ")
 							.map((word, index) => (
 								<motion.span
@@ -87,9 +88,7 @@ export default function Page() {
 						}}
 						className="relative z-10 mx-auto max-w-xl py-4 text-center text-lg font-normal text-neutral-600 dark:text-neutral-400"
 					>
-						With AI, you can launch your website in hours, not days.
-						Try our best in class, state of the art, cutting edge AI
-						tools to get your website up.
+						Currently Working on a Horror Experience
 					</motion.p>
 					<motion.div
 						initial={{
@@ -104,12 +103,13 @@ export default function Page() {
 						}}
 						className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
 					>
-						<button className="w-60 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-							Explore Now
-						</button>
-						<button className="w-60 transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
-							Contact Support
-						</button>
+						<a
+							href="https://shreyas-mishra.itch.io/tactical-troops"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<ArcadeButton>Check it out</ArcadeButton>
+						</a>
 					</motion.div>
 					<motion.div
 						initial={{
@@ -128,7 +128,7 @@ export default function Page() {
 					>
 						<div className="w-full overflow-hidden rounded-xl border border-gray-300 dark:border-gray-700">
 							<GlitchImage
-								src="next.svg"
+								src="TacTroops.png"
 								alt="Landing page preview"
 								className="h-full w-full m-auto"
 							/>
@@ -172,34 +172,31 @@ export default function Page() {
 					duration: 0.3,
 					delay: 1.2,
 				}}
-				className="relative z-10 my-20 w-full rounded-3xl border border-neutral-200 bg-neutral-100 p-4 shadow-md dark:border-neutral-800 dark:bg-neutral-900"
+				className="relative z-10 my-20 w-full rounded-3xl border border-neutral-200 bg-neutral-100 p-8 shadow-md dark:border-neutral-800 dark:bg-neutral-900"
 			>
 				<div className="w-full flex flex-col justify-center items-center">
 					<TypewriterEffectSmooth words={aboutUsWords} />
-					<ArcadeButton>Join Us</ArcadeButton>
+					<a href="/careers">
+						<ArcadeButton>Join Us</ArcadeButton>
+					</a>
 				</div>
-				<div className="grid grid-cols-2 gap-4 mt-10 pb-5">
-					<HoverCard
-						title="About Us"
-						icon={
-							<Image
-								src="vercel.svg"
-								alt="Next.js"
-								width={24}
-								height={24}
-							/>
-						}
+				<div className="grid grid-cols-3 gap-10 mt-10 pb-5">
+					<BGCard
+						title="Ashank"
+						image="/Ash_Pic.jpg"
+						description="CEO, Project Manager"
+						link="https://www.linkedin.com/in/ashank-rajput/"
 					/>
-					<HoverCard
-						title="About Us"
-						icon={
-							<Image
-								src="vercel.svg"
-								alt="Next.js"
-								width={24}
-								height={24}
-							/>
-						}
+					<BGCard
+						title="Shreyas"
+						image="/Shreyas_Pic.jpeg"
+						description="CTO, Lead Developer"
+						link="https://www.linkedin.com/in/ashank-rajput/"
+					/>
+					<BGCard
+						title="???"
+						image="/question-mark.png"
+						description="Lead Artist"
 					/>
 				</div>
 			</motion.section>

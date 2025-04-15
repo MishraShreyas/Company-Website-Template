@@ -9,48 +9,30 @@ import Link from "next/link";
 export function FeaturesSectionDemo() {
 	const features = [
 		{
-			title: "Track issues effectively",
-			description:
-				"Track and manage your project issues with ease using our intuitive interface.",
-			skeleton: <SkeletonOne />,
-			className:
-				"col-span-1 lg:col-span-4 border-b lg:border-r dark:border-neutral-800",
-		},
-		{
-			title: "Capture pictures with AI",
-			description:
-				"Capture stunning photos effortlessly using our advanced AI technology.",
+			title: "Tactical Troops Gallery",
+			description: "",
 			skeleton: <SkeletonTwo />,
 			className:
-				"border-b col-span-1 lg:col-span-2 dark:border-neutral-800",
+				"border-b col-span-1 lg:col-span-3 dark:border-neutral-800",
 		},
 		{
-			title: "Watch our AI on YouTube",
+			title: "Tactical Troops Trailer",
 			description:
-				"Whether its you or Tyler Durden, you can get to know about our product on YouTube",
+				"Assemble your troops and lead them to victory through ten increasingly difficult battles, all while upgrading and powering up your troops with unique abilities and weapons.",
 			skeleton: <SkeletonThree />,
-			className:
-				"col-span-1 lg:col-span-3 lg:border-r  dark:border-neutral-800",
-		},
-		{
-			title: "Deploy in seconds",
-			description:
-				"With our blazing fast, state of the art, cutting edge, we are so back cloud servies (read AWS) - you can deploy your model in seconds.",
-			skeleton: <SkeletonFour />,
-			className: "col-span-1 lg:col-span-3 border-b lg:border-none",
+			className: "col-span-1 lg:col-span-3 dark:border-neutral-800",
 		},
 	];
 	return (
 		<div className="relative z-20 py-10 max-w-7xl mx-auto">
 			<div className="px-8">
 				<h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-medium text-black dark:text-white">
-					Packed with thousands of features
+					About Us
 				</h4>
 
 				<p className="text-sm lg:text-base  max-w-2xl  my-4 mx-auto text-neutral-500 text-center font-normal dark:text-neutral-300">
-					From Image generation to video generation, Everything AI has
-					APIs for literally everything. It can even create this
-					website copy for you.
+					Code, chaos, and creativity. Welcome to where your next
+					favorite game begins.
 				</p>
 			</div>
 
@@ -137,20 +119,20 @@ export const SkeletonOne = () => {
 export const SkeletonThree = () => {
 	return (
 		<Link
-			href="https://www.youtube.com/watch?v=RPa3_AD1_Vs"
+			href="https://youtu.be/oCM_6dhOBj4"
 			target="__blank"
-			className="relative flex gap-10  h-full group/image"
+			className="relative flex gap-10 group/image"
 		>
 			<div className="w-full  mx-auto bg-transparent dark:bg-transparent group h-full">
 				<div className="flex flex-1 w-full h-full flex-col space-y-2  relative">
 					{/* TODO */}
 					<IconBrandYoutubeFilled className="h-20 w-20 absolute z-10 inset-0 text-red-500 m-auto " />
 					<Image
-						src="window.svg"
+						src="/TacTroopsYT.png"
 						alt="header"
-						width={800}
-						height={800}
-						className="h-full w-full aspect-square object-cover object-center rounded-sm blur-none group-hover/image:blur-md transition-all duration-200"
+						width={1289}
+						height={964}
+						className="h-full w-full object-contain object-center rounded-sm blur-none group-hover/image:blur-md transition-all duration-200"
 					/>
 				</div>
 			</div>
@@ -160,12 +142,18 @@ export const SkeletonThree = () => {
 
 export const SkeletonTwo = () => {
 	const images = [
-		"file.svg",
-		"globe.svg",
-		"next.svg",
-		"vercel.svg",
-		"window.svg",
+		"/TacTroops.png",
+		"/TacTroops (2).png",
+		"/TacTroops (3).png",
+		"/TacTroops (4).png",
+		"/TacTroops (5).png",
+		"/TacTroops (6).png",
 	];
+
+	const getRandomImages = () => {
+		const shuffled = [...images].sort(() => 0.5 - Math.random());
+		return shuffled.slice(0, 4);
+	};
 
 	const imageVariants = {
 		whileHover: {
@@ -183,7 +171,7 @@ export const SkeletonTwo = () => {
 		<div className="relative flex flex-col items-start p-8 gap-10 h-full overflow-hidden">
 			{/* TODO */}
 			<div className="flex flex-row -ml-20">
-				{images.map((image, idx) => (
+				{getRandomImages().map((image, idx) => (
 					<motion.div
 						variants={imageVariants}
 						key={"images-first" + idx}
@@ -196,16 +184,16 @@ export const SkeletonTwo = () => {
 					>
 						<Image
 							src={image}
-							alt="bali images"
-							width="500"
-							height="500"
+							alt="Tac troops images"
+							width="1920"
+							height="1080"
 							className="rounded-lg h-20 w-20 md:h-40 md:w-40 object-cover shrink-0"
 						/>
 					</motion.div>
 				))}
 			</div>
 			<div className="flex flex-row">
-				{images.map((image, idx) => (
+				{getRandomImages().map((image, idx) => (
 					<motion.div
 						key={"images-second" + idx}
 						style={{
@@ -219,8 +207,8 @@ export const SkeletonTwo = () => {
 						<Image
 							src={image}
 							alt="bali images"
-							width="500"
-							height="500"
+							width="1920"
+							height="1080"
 							className="rounded-lg h-20 w-20 md:h-40 md:w-40 object-cover shrink-0"
 						/>
 					</motion.div>
