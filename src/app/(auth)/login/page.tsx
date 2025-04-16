@@ -11,7 +11,7 @@ import {
 	Form,
 	Input,
 } from "@heroui/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 // import { PlaceholderLogo } from "@/components/core/PlaceholderLogo"; // Create this
 
