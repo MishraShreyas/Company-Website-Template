@@ -24,7 +24,7 @@ const NAV_ITEMS = [
 	},
 	{
 		name: "Careers",
-		link: "https://unstop.com/p/social-media-marketing-obelithe-studios-1465182",
+		link: "https://forms.gle/q5vnRizHZqnMxYLz8",
 	},
 ];
 
