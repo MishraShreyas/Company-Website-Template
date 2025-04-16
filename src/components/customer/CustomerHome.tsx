@@ -182,13 +182,13 @@ export function CustomerHome() {
 							title="Ashank"
 							image="/Ash_Pic.jpg"
 							description="CEO, Project Manager"
-							link="https://www.linkedin.com/in/ashank-rajput/"
+							link="https://www.linkedin.com/in/ashankk/"
 						/>
 						<BGCard
 							title="Shreyas"
 							image="/Shreyas_Pic.jpeg"
 							description="CTO, Lead Developer"
-							link="https://www.linkedin.com/in/ashank-rajput/"
+							link="https://www.linkedin.com/in/shreyasmishra03/"
 						/>
 						<BGCard
 							title="???"
