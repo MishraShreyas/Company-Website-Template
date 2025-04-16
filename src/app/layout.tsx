@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { Providers } from "@/app/providers";
-import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "[Your Brand Name] - Employee Portal", // Placeholder
-	description: "Streamlining work for the [Your Brand Name] team.", // Placeholder
+	title: "Obelithe Studios",
+	description: "An indie game dev company based in India.",
 };
 
 export default function Layout({
@@ -21,11 +19,7 @@ export default function Layout({
 		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className}>
 				<Providers>
-					<AuthProvider>
-						<main>
-							<Header>{children}</Header>
-						</main>
-					</AuthProvider>
+					<main>{children}</main>
 				</Providers>
 			</body>
 		</html>

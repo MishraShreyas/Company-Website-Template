@@ -24,7 +24,7 @@ const NAV_ITEMS = [
 	},
 	{
 		name: "Careers",
-		link: "/careers",
+		link: "https://unstop.com/p/social-media-marketing-obelithe-studios-1465182",
 	},
 ];
 
@@ -51,12 +51,16 @@ export function Header({ children }: { children: React.ReactNode }) {
 				<MobileNav>
 					<MobileNavHeader>
 						<NavbarLogo />
-						<MobileNavToggle
-							isOpen={isMobileMenuOpen}
-							onClick={() =>
-								setIsMobileMenuOpen(!isMobileMenuOpen)
-							}
-						/>
+
+						<div className="flex items-center gap-2">
+							<ThemeSwitcher />
+							<MobileNavToggle
+								isOpen={isMobileMenuOpen}
+								onClick={() =>
+									setIsMobileMenuOpen(!isMobileMenuOpen)
+								}
+							/>
+						</div>
 					</MobileNavHeader>
 
 					<MobileNavMenu
@@ -79,14 +83,7 @@ export function Header({ children }: { children: React.ReactNode }) {
 								variant="primary"
 								className="w-full"
 							>
-								Login
-							</NavbarButton>
-							<NavbarButton
-								onClick={() => setIsMobileMenuOpen(false)}
-								variant="primary"
-								className="w-full"
-							>
-								Book a call
+								Contact Us
 							</NavbarButton>
 						</div>
 					</MobileNavMenu>
