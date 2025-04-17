@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/providers";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,7 @@ export default function Layout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
+			<GoogleAnalytics gaId="G-DVP3058CWF" />
 			<body className={inter.className}>
 				<Providers>
 					<main>{children}</main>
