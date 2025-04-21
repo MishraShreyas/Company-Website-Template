@@ -8,12 +8,15 @@ type User = Database["public"]["Tables"]["users"]["Row"];
 export async function isMeetingToday() {
 	const today = new Date().toISOString().split("T")[0];
 	const supabase = createClient();
+	const { user } = (await supabase.auth.getUser()).data;
+	if (!user) return false; // User not logged in
 
 	// match date
 	const { data, error } = await supabase
 		.from("meeting_attendance")
 		.select("*")
 		.eq("date", today)
+		.eq("user_id", user.id) // Match user ID
 		.single();
 
 	if (error) {
@@ -47,11 +50,12 @@ export async function getAllUsersMeetingToday(): Promise<User[]> {
 	const today = new Date().toISOString().split("T")[0];
 	const supabase = createClient();
 
-	// match date
+	// match date and attending
 	const { data, error } = await supabase
 		.from("meeting_attendance")
 		.select("*")
-		.eq("date", today);
+		.eq("date", today)
+		.eq("attending", true);
 
 	if (error) {
 		console.error("Error fetching meeting attendance:", error);
