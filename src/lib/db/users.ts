@@ -118,3 +118,24 @@ export async function getAllUsersWithRole(): Promise<UserWithRole[]> {
 
 	return (users as unknown as UserWithRole[]) || [];
 }
+
+export async function updatePassword(oldPassword: string, newPassword: string) {
+	const supabase = createClient();
+	const { user } = (await supabase.auth.getUser()).data;
+	if (!user) throw new Error("User not authenticated.");
+
+	const { error: signInError } = await supabase.auth.signInWithPassword({
+		email: user.email!,
+		password: oldPassword,
+	});
+
+	if (signInError) throw new Error("Old password is incorrect.");
+
+	const { error } = await supabase.auth.updateUser({
+		password: newPassword,
+	});
+
+	if (error) throw new Error("Failed to update password.");
+
+	return true;
+}
