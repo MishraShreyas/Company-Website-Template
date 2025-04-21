@@ -1,9 +1,10 @@
 "use client";
 import { cn } from "@/lib/utils";
-import Link, { LinkProps } from "next/link";
-import React, { useState, createContext, useContext } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { Spinner } from "@heroui/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link, { LinkProps } from "next/link";
+import React, { createContext, useContext, useState } from "react";
 
 interface Links {
 	label: string;
@@ -89,7 +90,7 @@ export const DesktopSidebar = ({
 		<>
 			<motion.div
 				className={cn(
-					"h-full px-4 py-4 hidden  md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0",
+					"h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0",
 					className
 				)}
 				animate={{
@@ -115,7 +116,7 @@ export const MobileSidebar = ({
 		<>
 			<div
 				className={cn(
-					"h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
+					"h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
 				)}
 				{...props}
 			>
@@ -155,6 +156,53 @@ export const MobileSidebar = ({
 	);
 };
 
+interface SidebarButtonProps {
+	className?: string;
+	onPress?: () => void;
+	loading?: boolean;
+	children: React.ReactNode;
+}
+
+export const SidebarButton = ({
+	className,
+	onPress,
+	loading,
+	children,
+	...props
+}: SidebarButtonProps) => {
+	const { open, animate } = useSidebar();
+	return (
+		<motion.button
+			onClick={onPress}
+			animate={{
+				translateX: animate ? (open ? 0 : -20) : 0,
+				opacity: animate ? (open ? 1 : 0) : 1,
+			}}
+			disabled={loading}
+			className={cn(
+				"flex items-center justify-evenly gap-2 group/sidebar hover:scale-105 transition duration-150 py-2 w-full rounded-lg",
+				className
+			)}
+			{...props}
+		>
+			{loading && <Spinner variant="dots" color="default" size="sm" />}
+			<motion.span
+				animate={{
+					display: animate
+						? open
+							? "inline-block"
+							: "none"
+						: "inline-block",
+					opacity: animate ? (open ? 1 : 0) : 1,
+				}}
+				className="text-neutral-700 dark:text-neutral-200 text-sm whitespace-pre inline-block text-center !p-0 !m-0"
+			>
+				{children}
+			</motion.span>
+		</motion.button>
+	);
+};
+
 export const SidebarLink = ({
 	link,
 	className,
@@ -169,7 +217,7 @@ export const SidebarLink = ({
 		<Link
 			href={link.href}
 			className={cn(
-				"flex items-center justify-start gap-2  group/sidebar py-2",
+				"flex items-center justify-start gap-2 group/sidebar py-2",
 				className
 			)}
 			{...props}

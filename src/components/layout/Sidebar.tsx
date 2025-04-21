@@ -1,18 +1,30 @@
 "use client";
-import React, { useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
+import { getUserById } from "@/lib/db";
+import { isMeetingToday, updateMeetingToday } from "@/lib/db";
+import { createClient } from "@/utils/supabase/client";
 import {
 	IconArrowLeft,
 	IconBrandTabler,
 	IconSettings,
 	IconUserBolt,
 } from "@tabler/icons-react";
-import Link from "next/link";
+import { User } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import {
+	Sidebar,
+	SidebarBody,
+	SidebarButton,
+	SidebarLink,
+} from "../ui/sidebar";
 
-export function SidebarLayout() {
+interface SidebarLayoutProps {
+	children: React.ReactNode;
+	subdomain: null | "admin" | "employee";
+}
+
+export function SidebarLayout({ children }: SidebarLayoutProps) {
 	const links = [
 		{
 			label: "Dashboard",
@@ -30,7 +42,7 @@ export function SidebarLayout() {
 		},
 		{
 			label: "Settings",
-			href: "#",
+			href: "/settings",
 			icon: (
 				<IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
 			),
@@ -44,13 +56,47 @@ export function SidebarLayout() {
 		},
 	];
 	const [open, setOpen] = useState(false);
+
+	const [initialLoading, setInitialLoading] = useState(true);
+	const [user, setUser] = useState<null | {
+		id: string;
+		name: string;
+	}>(null);
+
+	const [loading, setLoading] = useState(false);
+	const [meetingToday, setMeetingToday] = useState(false);
+
+	const toggleMeetingToday = async () => {
+		setLoading(true);
+		const updatedMeeting = await updateMeetingToday(!meetingToday);
+		if (updatedMeeting) {
+			setMeetingToday(!meetingToday);
+		}
+		setLoading(false);
+	};
+
+	useEffect(() => {
+		const fetchUser = async () => {
+			const { user } = (await createClient().auth.getUser()).data;
+			if (user) {
+				const userData = await getUserById(user.id);
+				if (userData) {
+					setUser({
+						id: userData.id,
+						name: userData.full_name || "User",
+					});
+				}
+			}
+
+			setMeetingToday(await isMeetingToday());
+
+			setInitialLoading(false);
+		};
+		fetchUser();
+	}, []);
+
 	return (
-		<div
-			className={cn(
-				"mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-				"h-[60vh]" // for your use case, use `h-screen` instead of `h-[60vh]`
-			)}
-		>
+		<div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-dvh">
 			<Sidebar open={open} setOpen={setOpen}>
 				<SidebarBody className="justify-between gap-10">
 					<div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
@@ -61,26 +107,37 @@ export function SidebarLayout() {
 							))}
 						</div>
 					</div>
-					<div>
+					<div className="space-y-2">
+						{!initialLoading && (
+							<SidebarButton
+								className={
+									meetingToday ? "bg-green-700" : "bg-red-800"
+								}
+								loading={loading}
+								onPress={toggleMeetingToday}
+							>
+								{meetingToday
+									? "Attending Meeting"
+									: "Not Attending Meeting"}
+							</SidebarButton>
+						)}
 						<SidebarLink
 							link={{
-								label: "Manu Arora",
+								label: initialLoading
+									? ""
+									: user?.name || "User",
 								href: "#",
 								icon: (
-									<Image
-										src="https://assets.aceternity.com/manu.png"
-										className="h-7 w-7 shrink-0 rounded-full"
-										width={50}
-										height={50}
-										alt="Avatar"
-									/>
+									<User className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
 								),
 							}}
 						/>
 					</div>
 				</SidebarBody>
 			</Sidebar>
-			<Dashboard />
+			<div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+				{children}
+			</div>
 		</div>
 	);
 }
@@ -96,7 +153,7 @@ export const Logo = () => {
 				animate={{ opacity: 1 }}
 				className="font-medium whitespace-pre text-black dark:text-white"
 			>
-				Acet Labs
+				Obelithe Studios
 			</motion.span>
 		</Link>
 	);
@@ -109,31 +166,5 @@ export const LogoIcon = () => {
 		>
 			<div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
 		</Link>
-	);
-};
-
-// Dummy dashboard component with content
-const Dashboard = () => {
-	return (
-		<div className="flex flex-1">
-			<div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
-				<div className="flex gap-2">
-					{[...new Array(4)].map((i, idx) => (
-						<div
-							key={"first-array-demo-1" + idx}
-							className="h-20 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-neutral-800"
-						></div>
-					))}
-				</div>
-				<div className="flex flex-1 gap-2">
-					{[...new Array(2)].map((i, idx) => (
-						<div
-							key={"second-array-demo-1" + idx}
-							className="h-full w-full animate-pulse rounded-lg bg-gray-100 dark:bg-neutral-800"
-						></div>
-					))}
-				</div>
-			</div>
-		</div>
 	);
 };

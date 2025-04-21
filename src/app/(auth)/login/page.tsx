@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 // import { PlaceholderLogo } from "@/components/core/PlaceholderLogo"; // Create this
 
-export default function LoginPage() {
+export default function Page() {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");

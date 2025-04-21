@@ -48,8 +48,12 @@ export async function updateSession(request: NextRequest) {
 		data: { user },
 	} = await supabase.auth.getUser();
 
+	const subdomain = request.headers.get("host")?.split(".")[0] || "www";
+
 	if (
-		!user &&
+		(!user &&
+			subdomain !== "www" &&
+			request.nextUrl.pathname !== "/login") ||
 		!PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))
 	) {
 		// no user, potentially respond by redirecting the user to the login page

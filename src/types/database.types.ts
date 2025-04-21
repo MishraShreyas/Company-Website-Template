@@ -39,12 +39,155 @@ export type Database = {
 						foreignKeyName: "activity_logs_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "activity_logs_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
 						referencedRelation: "tasks";
 						referencedColumns: ["id"];
 					},
 					{
 						foreignKeyName: "activity_logs_user_id_fkey";
 						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			approvals: {
+				Row: {
+					approval_id: string;
+					approved: boolean | null;
+					approved_at: string | null;
+					bill_id: number | null;
+					comment: string | null;
+					manager_id: string | null;
+				};
+				Insert: {
+					approval_id: string;
+					approved?: boolean | null;
+					approved_at?: string | null;
+					bill_id?: number | null;
+					comment?: string | null;
+					manager_id?: string | null;
+				};
+				Update: {
+					approval_id?: string;
+					approved?: boolean | null;
+					approved_at?: string | null;
+					bill_id?: number | null;
+					comment?: string | null;
+					manager_id?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "approvals_bill_id_fkey";
+						columns: ["bill_id"];
+						isOneToOne: false;
+						referencedRelation: "bills";
+						referencedColumns: ["bill_id"];
+					},
+					{
+						foreignKeyName: "approvals_manager_id_fkey";
+						columns: ["manager_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			bills: {
+				Row: {
+					amount: number;
+					bill_id: number;
+					bill_type: string;
+					created_at: string | null;
+					description: string | null;
+					due_date: string | null;
+					file_url: string | null;
+					status: string | null;
+					title: string;
+					uploaded_by: string | null;
+				};
+				Insert: {
+					amount: number;
+					bill_id?: number;
+					bill_type: string;
+					created_at?: string | null;
+					description?: string | null;
+					due_date?: string | null;
+					file_url?: string | null;
+					status?: string | null;
+					title: string;
+					uploaded_by?: string | null;
+				};
+				Update: {
+					amount?: number;
+					bill_id?: number;
+					bill_type?: string;
+					created_at?: string | null;
+					description?: string | null;
+					due_date?: string | null;
+					file_url?: string | null;
+					status?: string | null;
+					title?: string;
+					uploaded_by?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "bills_uploaded_by_fkey";
+						columns: ["uploaded_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			budget_planner: {
+				Row: {
+					actual_spent: number | null;
+					allocated_amount: number;
+					attachment_url: string | null;
+					budget_id: number;
+					category: string;
+					created_at: string | null;
+					created_by: string | null;
+					is_recurring: boolean | null;
+					month: string | null;
+					notes: string | null;
+				};
+				Insert: {
+					actual_spent?: number | null;
+					allocated_amount: number;
+					attachment_url?: string | null;
+					budget_id?: number;
+					category: string;
+					created_at?: string | null;
+					created_by?: string | null;
+					is_recurring?: boolean | null;
+					month?: string | null;
+					notes?: string | null;
+				};
+				Update: {
+					actual_spent?: number | null;
+					allocated_amount?: number;
+					attachment_url?: string | null;
+					budget_id?: number;
+					category?: string;
+					created_at?: string | null;
+					created_by?: string | null;
+					is_recurring?: boolean | null;
+					month?: string | null;
+					notes?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "budget_planner_created_by_fkey";
+						columns: ["created_by"];
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
@@ -75,7 +218,40 @@ export type Database = {
 						foreignKeyName: "labels_project_id_fkey";
 						columns: ["project_id"];
 						isOneToOne: false;
+						referencedRelation: "project_with_team_view";
+						referencedColumns: ["project_id"];
+					},
+					{
+						foreignKeyName: "labels_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
 						referencedRelation: "projects";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			meeting_attendance: {
+				Row: {
+					attending: boolean | null;
+					date: string | null;
+					user_id: string;
+				};
+				Insert: {
+					attending?: boolean | null;
+					date?: string | null;
+					user_id?: string;
+				};
+				Update: {
+					attending?: boolean | null;
+					date?: string | null;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "meeting_attendance_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
 				];
@@ -206,6 +382,20 @@ export type Database = {
 						referencedColumns: ["id"];
 					},
 					{
+						foreignKeyName: "role_permissions_permission_id_fkey";
+						columns: ["permission_id"];
+						isOneToOne: false;
+						referencedRelation: "role_with_permissions_view";
+						referencedColumns: ["permission_id"];
+					},
+					{
+						foreignKeyName: "role_permissions_role_id_fkey";
+						columns: ["role_id"];
+						isOneToOne: false;
+						referencedRelation: "role_with_permissions_view";
+						referencedColumns: ["role_id"];
+					},
+					{
 						foreignKeyName: "role_permissions_role_id_fkey";
 						columns: ["role_id"];
 						isOneToOne: false;
@@ -262,6 +452,13 @@ export type Database = {
 						foreignKeyName: "task_attachments_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "task_attachments_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
 						referencedRelation: "tasks";
 						referencedColumns: ["id"];
 					},
@@ -301,6 +498,13 @@ export type Database = {
 						foreignKeyName: "task_comments_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "task_comments_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
 						referencedRelation: "tasks";
 						referencedColumns: ["id"];
 					},
@@ -335,6 +539,20 @@ export type Database = {
 						referencedColumns: ["id"];
 					},
 					{
+						foreignKeyName: "task_labels_label_id_fkey";
+						columns: ["label_id"];
+						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["label_id"];
+					},
+					{
+						foreignKeyName: "task_labels_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
 						foreignKeyName: "task_labels_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
@@ -355,6 +573,7 @@ export type Database = {
 					percent: number | null;
 					priority: number | null;
 					project_id: string | null;
+					start_date: string | null;
 					status: string | null;
 					title: string;
 				};
@@ -369,6 +588,7 @@ export type Database = {
 					percent?: number | null;
 					priority?: number | null;
 					project_id?: string | null;
+					start_date?: string | null;
 					status?: string | null;
 					title: string;
 				};
@@ -383,6 +603,7 @@ export type Database = {
 					percent?: number | null;
 					priority?: number | null;
 					project_id?: string | null;
+					start_date?: string | null;
 					status?: string | null;
 					title?: string;
 				};
@@ -405,8 +626,22 @@ export type Database = {
 						foreignKeyName: "tasks_parent_task_id_fkey";
 						columns: ["parent_task_id"];
 						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "tasks_parent_task_id_fkey";
+						columns: ["parent_task_id"];
+						isOneToOne: false;
 						referencedRelation: "tasks";
 						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "tasks_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "project_with_team_view";
+						referencedColumns: ["project_id"];
 					},
 					{
 						foreignKeyName: "tasks_project_id_fkey";
@@ -504,6 +739,13 @@ export type Database = {
 						foreignKeyName: "user_roles_role_id_fkey";
 						columns: ["role_id"];
 						isOneToOne: false;
+						referencedRelation: "role_with_permissions_view";
+						referencedColumns: ["role_id"];
+					},
+					{
+						foreignKeyName: "user_roles_role_id_fkey";
+						columns: ["role_id"];
+						isOneToOne: false;
 						referencedRelation: "roles";
 						referencedColumns: ["id"];
 					},
@@ -539,10 +781,113 @@ export type Database = {
 			};
 		};
 		Views: {
-			[_ in never]: never;
+			project_with_team_view: {
+				Row: {
+					created_by: string | null;
+					description: string | null;
+					due_date: string | null;
+					priority: number | null;
+					project_created_at: string | null;
+					project_id: string | null;
+					status: string | null;
+					team_created_at: string | null;
+					team_description: string | null;
+					team_id: string | null;
+					team_name: string | null;
+					title: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "projects_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "teams";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			role_with_permissions_view: {
+				Row: {
+					permission_description: string | null;
+					permission_id: string | null;
+					permission_name: string | null;
+					role_created_at: string | null;
+					role_description: string | null;
+					role_id: string | null;
+					role_name: string | null;
+				};
+				Relationships: [];
+			};
+			task_summary_view: {
+				Row: {
+					assigned_to: string | null;
+					assigned_user_avatar: string | null;
+					assigned_user_name: string | null;
+					description: string | null;
+					due_date: string | null;
+					label_color: string | null;
+					label_id: string | null;
+					label_name: string | null;
+					parent_task_id: string | null;
+					percent: number | null;
+					priority: number | null;
+					project_id: string | null;
+					start_date: string | null;
+					status: string | null;
+					task_id: string | null;
+					title: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "tasks_assigned_to_fkey";
+						columns: ["assigned_to"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "tasks_parent_task_id_fkey";
+						columns: ["parent_task_id"];
+						isOneToOne: false;
+						referencedRelation: "task_summary_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "tasks_parent_task_id_fkey";
+						columns: ["parent_task_id"];
+						isOneToOne: false;
+						referencedRelation: "tasks";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "tasks_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "project_with_team_view";
+						referencedColumns: ["project_id"];
+					},
+					{
+						foreignKeyName: "tasks_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "projects";
+						referencedColumns: ["id"];
+					}
+				];
+			};
 		};
 		Functions: {
-			[_ in never]: never;
+			is_admin: {
+				Args: Record<PropertyKey, never>;
+				Returns: boolean;
+			};
 		};
 		Enums: {
 			[_ in never]: never;
