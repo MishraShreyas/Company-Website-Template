@@ -174,15 +174,17 @@ export const SidebarAttendance = ({
 	return (
 		<motion.button
 			onClick={onPress}
+			transition={{
+				ease: "easeInOut",
+			}}
 			animate={{
 				// translateX: animate ? (open ? 0 : -20) : 0,
 				// opacity: animate ? (open ? 1 : 0) : 1,
 				aspectRatio: animate ? (open ? "auto" : 1) : "auto",
-				borderRadius: animate ? (open ? "0.5rem" : "100%") : "0.5rem",
 			}}
 			disabled={loading}
 			className={cn(
-				"relative flex items-center justify-evenly h-8 gap-2 group/sidebar hover:scale-105 transition duration-150 py-2 w-full rounded-lg",
+				"relative flex items-center justify-evenly overflow-hidden h-8 gap-2 group/sidebar hover:scale-105 transition duration-150 py-2 w-full rounded-lg",
 				className
 			)}
 			{...props}
@@ -202,6 +204,7 @@ export const SidebarAttendance = ({
 							? "inline-block"
 							: "none"
 						: "inline-block",
+					translateX: animate ? (open ? 0 : -20) : 0,
 					opacity: animate ? (open ? 1 : 0) : 1,
 				}}
 				className="text-neutral-700 dark:text-neutral-200 text-sm whitespace-pre inline-block text-center !p-0 !m-0"
