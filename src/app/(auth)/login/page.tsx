@@ -62,7 +62,7 @@ export default function Page() {
 		<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
 			<Card className="w-fit shadow-xl">
 				<CardHeader className="text-center flex-col">
-					<div className="mx-auto mb-4 text-center font-mono text-8xl text-primary font-extrabold">
+					<div className="mx-auto mb-4 text-center font-mono text-5xl md:text-8xl text-primary font-extrabold">
 						{"OBELITHE"}
 						{/* Adjust size as needed */}
 						{/* <PlaceholderLogo /> */}
