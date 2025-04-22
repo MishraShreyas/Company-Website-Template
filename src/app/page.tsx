@@ -11,7 +11,11 @@ export default async function Page() {
 		case "admin":
 			return <AdminHome />;
 		case "employee":
-			return <div />;
+			return <div>
+				<p classNams="text-3xl">
+					Employee Portal is WIP. Please use the navigation bar to mark attendance!
+				</p>
+			</div>;
 		default:
 			return <CustomerHome />;
 	}
