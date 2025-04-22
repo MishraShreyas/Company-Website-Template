@@ -12,7 +12,7 @@ export default async function Page() {
 			return <AdminHome />;
 		case "employee":
 			return <div>
-				<p classNams="text-3xl">
+				<p className="text-3xl">
 					Employee Portal is WIP. Please use the navigation bar to mark attendance!
 				</p>
 			</div>;
