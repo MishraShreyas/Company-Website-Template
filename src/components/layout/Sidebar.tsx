@@ -108,7 +108,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 						</div>
 					</div>
 					<div className="space-y-2">
-						{!initialLoading && (
+						{!initialLoading && user && (
 							<SidebarAttendance
 								className={
 									meetingToday ? "bg-green-700" : "bg-red-800"
@@ -125,7 +125,9 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 							link={{
 								label: initialLoading
 									? ""
-									: user?.name || "User",
+									: user
+									? user?.name || "User"
+									: "Please Log In",
 								href: "#",
 								icon: (
 									<User className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
