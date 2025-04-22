@@ -15,7 +15,7 @@ import React, { useEffect, useState } from "react";
 import {
 	Sidebar,
 	SidebarBody,
-	SidebarButton,
+	SidebarAttendance,
 	SidebarLink,
 } from "../ui/sidebar";
 
@@ -28,7 +28,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 	const links = [
 		{
 			label: "Dashboard",
-			href: "#",
+			href: "/",
 			icon: (
 				<IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
 			),
@@ -109,7 +109,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 					</div>
 					<div className="space-y-2">
 						{!initialLoading && (
-							<SidebarButton
+							<SidebarAttendance
 								className={
 									meetingToday ? "bg-green-700" : "bg-red-800"
 								}
@@ -119,7 +119,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 								{meetingToday
 									? "Attending Meeting"
 									: "Not Attending Meeting"}
-							</SidebarButton>
+							</SidebarAttendance>
 						)}
 						<SidebarLink
 							link={{

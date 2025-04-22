@@ -163,7 +163,7 @@ interface SidebarButtonProps {
 	children: React.ReactNode;
 }
 
-export const SidebarButton = ({
+export const SidebarAttendance = ({
 	className,
 	onPress,
 	loading,
@@ -175,17 +175,26 @@ export const SidebarButton = ({
 		<motion.button
 			onClick={onPress}
 			animate={{
-				translateX: animate ? (open ? 0 : -20) : 0,
-				opacity: animate ? (open ? 1 : 0) : 1,
+				// translateX: animate ? (open ? 0 : -20) : 0,
+				// opacity: animate ? (open ? 1 : 0) : 1,
+				aspectRatio: animate ? (open ? "auto" : 1) : "auto",
+				borderRadius: animate ? (open ? "0.5rem" : "100%") : "0.5rem",
 			}}
 			disabled={loading}
 			className={cn(
-				"flex items-center justify-evenly gap-2 group/sidebar hover:scale-105 transition duration-150 py-2 w-full rounded-lg",
+				"relative flex items-center justify-evenly h-8 gap-2 group/sidebar hover:scale-105 transition duration-150 py-2 w-full rounded-lg",
 				className
 			)}
 			{...props}
 		>
-			{loading && <Spinner variant="dots" color="default" size="sm" />}
+			{loading && (
+				<Spinner
+					variant="wave"
+					color="default"
+					size="sm"
+					className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+				/>
+			)}
 			<motion.span
 				animate={{
 					display: animate

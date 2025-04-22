@@ -2,10 +2,24 @@
 
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { updateUser } from "@/lib/db";
-import { createUser } from "@/lib/dbServer/users";
+import { createUser, deleteUser } from "@/lib/dbServer/users";
 import { Database } from "@/types/database.types";
-import { addToast, Button, Card, CardHeader, Form, Input } from "@heroui/react";
+import {
+	addToast,
+	Button,
+	Card,
+	CardHeader,
+	Form,
+	Input,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	useDisclosure,
+} from "@heroui/react";
 import { IconEdit, IconPlus, IconUser } from "@tabler/icons-react";
+import { Eye, EyeOff } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { RefObject, useEffect, useId, useRef, useState } from "react";
 
@@ -28,7 +42,12 @@ export function UserManagement({
 	const ref = useRef<HTMLDivElement>(null);
 	const id = useId();
 
+	const { isOpen, onOpen, onOpenChange } = useDisclosure();
 	const [loading, setLoading] = useState(false);
+
+	const [viewPassword, setViewPassword] = useState(false);
+	const [viewConfirmPassword, setViewConfirmPassword] = useState(false);
+	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
 	const openNewUser = () => {
 		setActive({
@@ -43,6 +62,13 @@ export function UserManagement({
 		setActive(user);
 	};
 
+	const clickDeleteUser = () => {
+		if (typeof active !== "object") return;
+		setUserToDelete(active);
+		setActive(false);
+		onOpen();
+	};
+
 	const updateUserSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
@@ -51,6 +77,7 @@ export function UserManagement({
 		const email = formData.get("email") as string;
 		const avatarUrl = formData.get("avatarUrl") as string;
 		const password = formData.get("password") as string;
+		const confirmPassword = formData.get("confirm-password") as string;
 
 		try {
 			if (active && typeof active === "object") {
@@ -61,6 +88,16 @@ export function UserManagement({
 					if (!password) {
 						addToast({
 							title: "Password is required for new users",
+							color: "danger",
+							timeout: 2000,
+						});
+						setLoading(false);
+						return;
+					}
+
+					if (password !== confirmPassword) {
+						addToast({
+							title: "Passwords do not match",
 							color: "danger",
 							timeout: 2000,
 						});
@@ -110,9 +147,9 @@ export function UserManagement({
 	const deleteActiveUser = async () => {
 		setLoading(true);
 		try {
-			if (active && typeof active === "object" && active.id !== "new") {
-				// await deleteUser(active.id);
-				// updateUserLocal(active.id, active, null);
+			if (userToDelete) {
+				await deleteUser(userToDelete.id);
+				updateUserLocal(userToDelete.id, userToDelete, null);
 				setActive(null);
 			}
 		} catch (error) {
@@ -251,10 +288,62 @@ export function UserManagement({
 													<Input
 														isRequired
 														errorMessage="Please enter a password"
+														endContent={
+															<button
+																className="focus:outline-none cursor-pointer"
+																type="button"
+																aria-label="Toggle password visibility"
+																onClick={() =>
+																	setViewPassword(
+																		!viewPassword
+																	)
+																}
+															>
+																{viewPassword ? (
+																	<Eye />
+																) : (
+																	<EyeOff />
+																)}
+															</button>
+														}
 														name="password"
 														label="Password"
-														type="password"
+														type={
+															viewPassword
+																? "text"
+																: "password"
+														}
 														autoComplete="new-password"
+													/>
+													<Input
+														isRequired
+														errorMessage="Please enter a password"
+														endContent={
+															<button
+																className="focus:outline-none cursor-pointer"
+																type="button"
+																aria-label="Toggle password visibility"
+																onClick={() =>
+																	setViewConfirmPassword(
+																		!viewConfirmPassword
+																	)
+																}
+															>
+																{viewConfirmPassword ? (
+																	<Eye />
+																) : (
+																	<EyeOff />
+																)}
+															</button>
+														}
+														name="confirm-password"
+														label="Confirm Password"
+														type={
+															viewConfirmPassword
+																? "text"
+																: "password"
+														}
+														autoComplete="confirm-password"
 													/>
 												</>
 											) : (
@@ -273,7 +362,7 @@ export function UserManagement({
 								<div className="flex justify-end items-center p-4 gap-2">
 									{active.id !== "new" && (
 										<Button
-											onPress={deleteActiveUser}
+											onPress={clickDeleteUser}
 											isLoading={loading}
 											color="danger"
 										>
@@ -336,6 +425,50 @@ export function UserManagement({
 					</motion.div>
 				))}
 			</ul>
+
+			<Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
+				<ModalContent>
+					{(onClose) => (
+						<>
+							<ModalHeader className="flex flex-col gap-1">
+								Are you sure you want to delete the user{" "}
+								{typeof active === "object" &&
+									`${active?.full_name}`}
+								?
+							</ModalHeader>
+							<ModalBody>
+								<p>
+									This action cannot be undone. The user will
+									be permanently deleted from the system.
+								</p>
+							</ModalBody>
+							<ModalFooter>
+								<Button
+									color="danger"
+									variant="light"
+									isLoading={loading}
+									onPress={onClose}
+								>
+									Cancel
+								</Button>
+								<Button
+									color="danger"
+									variant="solid"
+									isLoading={loading}
+									onPress={async () => {
+										setLoading(true);
+										await deleteActiveUser();
+										setLoading(false);
+										onClose();
+									}}
+								>
+									Delete
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
 		</>
 	);
 }

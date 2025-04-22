@@ -44,3 +44,21 @@ export async function createUser(
 
 	return JSON.parse(JSON.stringify(data));
 }
+
+export async function deleteUser(userId: string): Promise<boolean> {
+	const supabase = await createAdminClient();
+
+	const { error } = await supabase.from("users").delete().eq("id", userId);
+	if (error) {
+		console.error("Error deleting user from users table:", error);
+		return false;
+	}
+
+	const { error: delErr } = await supabase.auth.admin.deleteUser(userId);
+	if (delErr) {
+		console.error("Error deleting user:", error);
+		return false;
+	}
+
+	return true;
+}
