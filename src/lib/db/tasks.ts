@@ -151,7 +151,7 @@ export async function getTaskSummary(
 	// Return type depends on includeDetails
 
 	const { data, error } = await createClient()
-		.from("task_summary_view")
+		.from("tasks")
 		.select(`*`)
 		.eq("project_id", projectId)
 		.order("created_at", { ascending: false }); // Default sort
@@ -162,42 +162,42 @@ export async function getTaskSummary(
 	}
 
 	// group labels of same task
-	const groupedData = data?.reduce((acc: TaskSummary[], task) => {
-		const existingTask = acc.find((t) => t.id === task.task_id);
-		if (existingTask) {
-			existingTask.labels.push({
-				id: task.label_id || "",
-				name: task.label_name || "",
-				color: task.label_color || "",
-				project_id: task.project_id || "",
-			});
-		} else {
-			acc.push({
-				title: task.title || "",
-				id: task.task_id || "",
-				description: task.description || "",
-				status: task.status || "",
-				priority: task.priority || 0,
-				start_date: task.start_date || null,
-				due_date: task.due_date || null,
-				assigned_to: task.assigned_to || null,
-				project_id: task.project_id || "",
-				parent_task_id: task.parent_task_id || null,
-				percent: task.percent || 0,
-				labels: [
-					{
-						id: task.label_id || "",
-						name: task.label_name || "",
-						color: task.label_color || "",
-						project_id: task.project_id || "",
-					},
-				],
-			});
-		}
-		return acc;
-	}, [] as TaskSummary[]);
+	// const groupedData = data?.reduce((acc: TaskSummary[], task) => {
+	// 	const existingTask = acc.find((t) => t.id === task.task_id);
+	// 	if (existingTask) {
+	// 		existingTask.labels.push({
+	// 			id: task.label_id || "",
+	// 			name: task.label_name || "",
+	// 			color: task.label_color || "",
+	// 			project_id: task.project_id || "",
+	// 		});
+	// 	} else {
+	// 		acc.push({
+	// 			title: task.title || "",
+	// 			id: task.task_id || "",
+	// 			description: task.description || "",
+	// 			status: task.status || "",
+	// 			priority: task.priority || 0,
+	// 			start_date: task.start_date || null,
+	// 			due_date: task.due_date || null,
+	// 			assigned_to: task.assigned_to || null,
+	// 			project_id: task.project_id || "",
+	// 			parent_task_id: task.parent_task_id || null,
+	// 			percent: task.percent || 0,
+	// 			labels: [
+	// 				{
+	// 					id: task.label_id || "",
+	// 					name: task.label_name || "",
+	// 					color: task.label_color || "",
+	// 					project_id: task.project_id || "",
+	// 				},
+	// 			],
+	// 		});
+	// 	}
+	// 	return acc;
+	// }, [] as TaskSummary[]);
 
-	return groupedData || [];
+	return [];
 }
 
 /**
