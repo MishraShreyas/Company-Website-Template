@@ -1,4 +1,4 @@
-import { getTeamMembers } from "@/lib/db/teams";
+import { getAllUsers } from "@/lib/db/users";
 import { Database } from "@/types/database.types";
 import { createClient } from "@/utils/supabase/client";
 
@@ -8,16 +8,10 @@ type ProjectUpdate = Database["public"]["Tables"]["projects"]["Update"];
 type Team = Database["public"]["Tables"]["teams"]["Row"];
 type User = Database["public"]["Tables"]["users"]["Row"]; // Assuming user type exists
 
-export type ProjectWithDetails = {
-	id: string;
-	created_at: string | null;
-	created_by: string | null;
-	description: string | null;
-	due_date: string | null;
-	priority: number | null;
-	status: string | null;
-	title: string | null;
-	team: Team | null;
+type ProjectWithTeamView =
+	Database["public"]["Views"]["projects_with_team_view"]["Row"];
+
+export type ProjectWithDetails = ProjectWithTeamView & {
 	team_members: (User & { joined_at: string | null })[];
 };
 
@@ -58,7 +52,7 @@ export async function getProjectByIdWithDetails(
 	projectId: string
 ): Promise<ProjectWithDetails | null> {
 	const { data, error } = await createClient()
-		.from("project_with_team_view")
+		.from("projects_with_team_view")
 		.select(`*`)
 		.eq("id", projectId)
 		.single();
@@ -70,7 +64,7 @@ export async function getProjectByIdWithDetails(
 // READ Projects with filtering and optional details
 export async function getAllProjects(): Promise<ProjectWithDetails[]> {
 	const { data, error } = await createClient()
-		.from("project_with_team_view")
+		.from("projects_with_team_view")
 		.select(`*`)
 		.order("created_at", { ascending: false });
 
@@ -78,33 +72,26 @@ export async function getAllProjects(): Promise<ProjectWithDetails[]> {
 
 	if (!data) return [] as ProjectWithDetails[];
 
-	// group up team members by project
-	const projectsWithMembers = await Promise.all(
-		data.map(async (project) => {
-			const team = await getTeamMembers(project.team_id!);
+	const allUsers = await getAllUsers();
 
-			return {
-				id: project.project_id,
-				created_at: project.project_created_at,
-				created_by: project.created_by,
-				description: project.description,
-				due_date: project.due_date,
-				priority: project.priority,
-				status: project.status,
-				title: project.title,
-				team: {
-					id: project.team_id,
-					name: project.team_name,
-					created_at: project.team_created_at,
-					description: project.team_description,
-				} as Team,
-				team_members: team,
-			} as ProjectWithDetails;
-		})
-	);
+	// group up team members by project
+	// const projectsWithMembers = await Promise.all(
+	// data.map(async (project) => {
+	//     const teamIds = getTeamMembers.
+	//     const team = allUsers.filter((user) => {
+	//         return project.team_members.some((member) => {
+	//             return member.user_id === user.id;
+	//         });
+	//     }
+
+	// 	return {
+	// 		team_members: team,
+	// 	} as ProjectWithDetails;
+	// })
+	// );
 
 	//
-	return projectsWithMembers || [];
+	return [];
 }
 
 // UPDATE Project

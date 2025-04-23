@@ -300,6 +300,13 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: "projects";
 						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "labels_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "projects_with_team_view";
+						referencedColumns: ["project_id"];
 					}
 				];
 			};
@@ -558,6 +565,13 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "projects_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "projects_with_team_view";
+						referencedColumns: ["team_id"];
 					},
 					{
 						foreignKeyName: "projects_team_id_fkey";
@@ -961,6 +975,13 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: "projects";
 						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "tasks_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "projects_with_team_view";
+						referencedColumns: ["project_id"];
 					}
 				];
 			};
@@ -984,6 +1005,13 @@ export type Database = {
 					user_id?: string;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "team_members_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "projects_with_team_view";
+						referencedColumns: ["team_id"];
+					},
 					{
 						foreignKeyName: "team_members_team_id_fkey";
 						columns: ["team_id"];
@@ -1231,6 +1259,54 @@ export type Database = {
 					payer_name: string | null;
 				};
 				Relationships: [];
+			};
+			projects_with_team_view: {
+				Row: {
+					due_date: string | null;
+					priority:
+						| Database["public"]["Enums"]["task_priority"]
+						| null;
+					project_created_at: string | null;
+					project_creator: string | null;
+					project_descriptions: string | null;
+					project_id: string | null;
+					project_title: string | null;
+					status: Database["public"]["Enums"]["task_status"] | null;
+					team_created_at: string | null;
+					team_description: string | null;
+					team_id: string | null;
+					team_name: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["project_creator"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["project_creator"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["project_creator"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["project_creator"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
 			};
 			role_with_permissions_view: {
 				Row: {
