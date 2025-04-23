@@ -64,13 +64,13 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 	}>(null);
 
 	const [loading, setLoading] = useState(false);
-	const [meetingToday, setMeetingToday] = useState(false);
+	const [meetingToday, setMeetingToday] = useState<boolean | null>(null);
 
-	const toggleMeetingToday = async () => {
+	const handleMeetingToday = async (meeting: boolean) => {
 		setLoading(true);
-		const updatedMeeting = await updateMeetingToday(!meetingToday);
+		const updatedMeeting = await updateMeetingToday(meeting);
 		if (updatedMeeting) {
-			setMeetingToday(!meetingToday);
+			setMeetingToday(meeting);
 		}
 		setLoading(false);
 	};
@@ -95,6 +95,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 		fetchUser();
 	}, []);
 
+	useEffect(() => {
+		console.log(meetingToday);
+	}, [meetingToday]);
+
 	return (
 		<div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-dvh">
 			<Sidebar open={open} setOpen={setOpen}>
@@ -108,19 +112,44 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 						</div>
 					</div>
 					<div className="space-y-2">
-						{!initialLoading && user && (
-							<SidebarAttendance
-								className={
-									meetingToday ? "bg-green-700" : "bg-red-800"
-								}
-								loading={loading}
-								onPress={toggleMeetingToday}
-							>
-								{meetingToday
-									? "Attending Meeting"
-									: "Not Attending Meeting"}
-							</SidebarAttendance>
-						)}
+						{!initialLoading &&
+							user &&
+							(meetingToday === null ? (
+								<div className="flex gap-2">
+									<SidebarAttendance
+										className="bg-red-800"
+										loading={loading}
+										onPress={() =>
+											handleMeetingToday(false)
+										}
+									>
+										Can Not Attend
+									</SidebarAttendance>
+									<SidebarAttendance
+										className="bg-green-700"
+										loading={loading}
+										onPress={() => handleMeetingToday(true)}
+									>
+										Attending Today
+									</SidebarAttendance>
+								</div>
+							) : (
+								<SidebarAttendance
+									className={
+										meetingToday
+											? "bg-green-700"
+											: "bg-red-800"
+									}
+									loading={loading}
+									onPress={() =>
+										handleMeetingToday(!meetingToday)
+									}
+								>
+									{meetingToday
+										? "Attending Meeting"
+										: "Not Attending Meeting"}
+								</SidebarAttendance>
+							))}
 						<SidebarLink
 							link={{
 								label: initialLoading

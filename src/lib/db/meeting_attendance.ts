@@ -1,11 +1,16 @@
-import { getUserById } from "@/lib/db/users";
 import { Database } from "@/types/database.types";
 import { createClient } from "@/utils/supabase/client";
 
-type Attendance = Database["public"]["Tables"]["meeting_attendance"]["Row"];
+// type Attendance = Database["public"]["Tables"]["meeting_attendance"]["Row"];
 type User = Database["public"]["Tables"]["users"]["Row"];
 
-export async function isMeetingToday() {
+export type Attendance = {
+	attending: User[];
+	not_attending: User[];
+	undecided: User[];
+};
+
+export async function isMeetingToday(): Promise<boolean | null> {
 	const today = new Date().toISOString().split("T")[0];
 	const supabase = createClient();
 	const { user } = (await supabase.auth.getUser()).data;
@@ -20,11 +25,13 @@ export async function isMeetingToday() {
 		.single();
 
 	if (error) {
-		if (error.code !== "PGRST116") throw error; // Ignore not found error
-		return false; // No meeting today
+		if (error.code !== "PGRST116") return null; // Ignore not found error
+		return null; // No meeting today
 	}
 
-	return data !== null && data.attending === true; // Meeting exists today
+	if (!data) return null;
+
+	return data.attending;
 }
 
 export async function updateMeetingToday(meeting: boolean) {
@@ -46,30 +53,29 @@ export async function updateMeetingToday(meeting: boolean) {
 	return data; // Meeting updated or created successfully
 }
 
-export async function getAllUsersMeetingToday(): Promise<User[]> {
+export async function getAllMeetingUsers(): Promise<Attendance> {
 	const today = new Date().toISOString().split("T")[0];
 	const supabase = createClient();
 
-	// match date and attending
-	const { data, error } = await supabase
-		.from("meeting_attendance")
-		.select("*")
-		.eq("date", today)
-		.eq("attending", true);
+	const { data, error } = await supabase.rpc("get_attendance_by_date", {
+		target_date: today,
+	});
 
 	if (error) {
 		console.error("Error fetching meeting attendance:", error);
-		return [];
+		return {
+			attending: [],
+			not_attending: [],
+			undecided: [],
+		};
 	}
 
-	if (!data || data.length === 0) return []; // No meeting attendance found
+	if (!data || data.length === 0)
+		return {
+			attending: [],
+			not_attending: [],
+			undecided: [],
+		}; // No meeting attendance found
 
-	const users = await Promise.all(
-		data.map(
-			async (attendance: Attendance) =>
-				await getUserById(attendance.user_id)
-		)
-	);
-
-	return users.filter((user) => user !== null) as User[]; // Filter out null users
+	return data[0] as Attendance; // Return the first row as attendance data
 }

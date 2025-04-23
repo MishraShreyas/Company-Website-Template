@@ -12,34 +12,34 @@ export type Database = {
 			activity_logs: {
 				Row: {
 					action: string | null;
-					created_at: string | null;
+					created_at: string;
 					details: Json | null;
 					id: string;
-					task_id: string | null;
-					user_id: string | null;
+					task_id: string;
+					user_id: string;
 				};
 				Insert: {
 					action?: string | null;
-					created_at?: string | null;
+					created_at?: string;
 					details?: Json | null;
 					id?: string;
-					task_id?: string | null;
-					user_id?: string | null;
+					task_id: string;
+					user_id?: string;
 				};
 				Update: {
 					action?: string | null;
-					created_at?: string | null;
+					created_at?: string;
 					details?: Json | null;
 					id?: string;
-					task_id?: string | null;
-					user_id?: string | null;
+					task_id?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
 						foreignKeyName: "activity_logs_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
@@ -53,141 +53,221 @@ export type Database = {
 						foreignKeyName: "activity_logs_user_id_fkey";
 						columns: ["user_id"];
 						isOneToOne: false;
-						referencedRelation: "users";
-						referencedColumns: ["id"];
-					}
-				];
-			};
-			approvals: {
-				Row: {
-					approval_id: string;
-					approved: boolean | null;
-					approved_at: string | null;
-					bill_id: number | null;
-					comment: string | null;
-					manager_id: string | null;
-				};
-				Insert: {
-					approval_id: string;
-					approved?: boolean | null;
-					approved_at?: string | null;
-					bill_id?: number | null;
-					comment?: string | null;
-					manager_id?: string | null;
-				};
-				Update: {
-					approval_id?: string;
-					approved?: boolean | null;
-					approved_at?: string | null;
-					bill_id?: number | null;
-					comment?: string | null;
-					manager_id?: string | null;
-				};
-				Relationships: [
-					{
-						foreignKeyName: "approvals_bill_id_fkey";
-						columns: ["bill_id"];
-						isOneToOne: false;
-						referencedRelation: "bills";
-						referencedColumns: ["bill_id"];
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
 					},
 					{
-						foreignKeyName: "approvals_manager_id_fkey";
-						columns: ["manager_id"];
+						foreignKeyName: "activity_logs_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "activity_logs_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "activity_logs_user_id_fkey";
+						columns: ["user_id"];
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
 				];
 			};
-			bills: {
+			bill_approval: {
 				Row: {
 					amount: number;
-					bill_id: number;
-					bill_type: string;
-					created_at: string | null;
-					description: string | null;
-					due_date: string | null;
-					file_url: string | null;
-					status: string | null;
-					title: string;
-					uploaded_by: string | null;
+					approved_amount: number | null;
+					approved_at: string | null;
+					approved_by: string | null;
+					description: string;
+					id: string;
+					receipt_url: string;
+					reimbursed_at: string | null;
+					status: Database["public"]["Enums"]["bill_status"];
+					submitted_at: string;
+					user_id: string;
 				};
 				Insert: {
 					amount: number;
-					bill_id?: number;
-					bill_type: string;
-					created_at?: string | null;
-					description?: string | null;
-					due_date?: string | null;
-					file_url?: string | null;
-					status?: string | null;
-					title: string;
-					uploaded_by?: string | null;
+					approved_amount?: number | null;
+					approved_at?: string | null;
+					approved_by?: string | null;
+					description: string;
+					id?: string;
+					receipt_url: string;
+					reimbursed_at?: string | null;
+					status?: Database["public"]["Enums"]["bill_status"];
+					submitted_at?: string;
+					user_id: string;
 				};
 				Update: {
 					amount?: number;
-					bill_id?: number;
-					bill_type?: string;
-					created_at?: string | null;
-					description?: string | null;
-					due_date?: string | null;
-					file_url?: string | null;
-					status?: string | null;
-					title?: string;
-					uploaded_by?: string | null;
+					approved_amount?: number | null;
+					approved_at?: string | null;
+					approved_by?: string | null;
+					description?: string;
+					id?: string;
+					receipt_url?: string;
+					reimbursed_at?: string | null;
+					status?: Database["public"]["Enums"]["bill_status"];
+					submitted_at?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "bills_uploaded_by_fkey";
-						columns: ["uploaded_by"];
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approved_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approved_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approved_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approved_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["user_id"];
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
 				];
 			};
-			budget_planner: {
+			budget_entries: {
 				Row: {
-					actual_spent: number | null;
-					allocated_amount: number;
-					attachment_url: string | null;
-					budget_id: number;
-					category: string;
-					created_at: string | null;
-					created_by: string | null;
-					is_recurring: boolean | null;
-					month: string | null;
-					notes: string | null;
+					amount: number;
+					category: string | null;
+					created_at: string;
+					created_by: string;
+					date: string;
+					description: string;
+					entry_type: Database["public"]["Enums"]["budget_entry_type"];
+					id: string;
+					paid_by: string | null;
+					receipt_url: string | null;
 				};
 				Insert: {
-					actual_spent?: number | null;
-					allocated_amount: number;
-					attachment_url?: string | null;
-					budget_id?: number;
-					category: string;
-					created_at?: string | null;
-					created_by?: string | null;
-					is_recurring?: boolean | null;
-					month?: string | null;
-					notes?: string | null;
+					amount: number;
+					category?: string | null;
+					created_at?: string;
+					created_by?: string;
+					date: string;
+					description: string;
+					entry_type: Database["public"]["Enums"]["budget_entry_type"];
+					id?: string;
+					paid_by?: string | null;
+					receipt_url?: string | null;
 				};
 				Update: {
-					actual_spent?: number | null;
-					allocated_amount?: number;
-					attachment_url?: string | null;
-					budget_id?: number;
-					category?: string;
-					created_at?: string | null;
-					created_by?: string | null;
-					is_recurring?: boolean | null;
-					month?: string | null;
-					notes?: string | null;
+					amount?: number;
+					category?: string | null;
+					created_at?: string;
+					created_by?: string;
+					date?: string;
+					description?: string;
+					entry_type?: Database["public"]["Enums"]["budget_entry_type"];
+					id?: string;
+					paid_by?: string | null;
+					receipt_url?: string | null;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "budget_planner_created_by_fkey";
+						foreignKeyName: "budget_entries_created_by_fkey";
 						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "budget_entries_paid_by_fkey";
+						columns: ["paid_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_paid_by_fkey";
+						columns: ["paid_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_paid_by_fkey";
+						columns: ["paid_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "budget_entries_paid_by_fkey";
+						columns: ["paid_by"];
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
@@ -196,31 +276,24 @@ export type Database = {
 			};
 			labels: {
 				Row: {
-					color: string | null;
+					color: string;
 					id: string;
 					name: string;
-					project_id: string | null;
+					project_id: string;
 				};
 				Insert: {
-					color?: string | null;
+					color?: string;
 					id?: string;
 					name: string;
-					project_id?: string | null;
+					project_id: string;
 				};
 				Update: {
-					color?: string | null;
+					color?: string;
 					id?: string;
 					name?: string;
-					project_id?: string | null;
+					project_id?: string;
 				};
 				Relationships: [
-					{
-						foreignKeyName: "labels_project_id_fkey";
-						columns: ["project_id"];
-						isOneToOne: false;
-						referencedRelation: "project_with_team_view";
-						referencedColumns: ["project_id"];
-					},
 					{
 						foreignKeyName: "labels_project_id_fkey";
 						columns: ["project_id"];
@@ -230,23 +303,116 @@ export type Database = {
 					}
 				];
 			};
+			managers: {
+				Row: {
+					emp_id: string;
+					manager_id: string;
+				};
+				Insert: {
+					emp_id: string;
+					manager_id: string;
+				};
+				Update: {
+					emp_id?: string;
+					manager_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "managers_emp_id_fkey";
+						columns: ["emp_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "managers_emp_id_fkey";
+						columns: ["emp_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "managers_emp_id_fkey";
+						columns: ["emp_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "managers_emp_id_fkey";
+						columns: ["emp_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "managers_manager_id_fkey";
+						columns: ["manager_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "managers_manager_id_fkey";
+						columns: ["manager_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "managers_manager_id_fkey";
+						columns: ["manager_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "managers_manager_id_fkey";
+						columns: ["manager_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
 			meeting_attendance: {
 				Row: {
-					attending: boolean | null;
-					date: string | null;
+					attending: boolean;
+					date: string;
 					user_id: string;
 				};
 				Insert: {
-					attending?: boolean | null;
-					date?: string | null;
+					attending?: boolean;
+					date: string;
 					user_id?: string;
 				};
 				Update: {
-					attending?: boolean | null;
-					date?: string | null;
+					attending?: boolean;
+					date?: string;
 					user_id?: string;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "meeting_attendance_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "meeting_attendance_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "meeting_attendance_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
 					{
 						foreignKeyName: "meeting_attendance_user_id_fkey";
 						columns: ["user_id"];
@@ -258,30 +424,51 @@ export type Database = {
 			};
 			notifications: {
 				Row: {
-					created_at: string | null;
+					created_at: string;
 					id: string;
 					payload: Json | null;
-					read: boolean | null;
+					read: boolean;
 					type: string | null;
 					user_id: string | null;
 				};
 				Insert: {
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
 					payload?: Json | null;
-					read?: boolean | null;
+					read?: boolean;
 					type?: string | null;
 					user_id?: string | null;
 				};
 				Update: {
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
 					payload?: Json | null;
-					read?: boolean | null;
+					read?: boolean;
 					type?: string | null;
 					user_id?: string | null;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "notifications_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "notifications_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "notifications_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
 					{
 						foreignKeyName: "notifications_user_id_fkey";
 						columns: ["user_id"];
@@ -311,39 +498,60 @@ export type Database = {
 			};
 			projects: {
 				Row: {
-					created_at: string | null;
-					created_by: string | null;
+					created_at: string;
+					created_by: string;
 					description: string | null;
 					due_date: string | null;
 					id: string;
-					priority: number | null;
-					status: string | null;
-					team_id: string | null;
+					priority: Database["public"]["Enums"]["task_priority"];
+					status: Database["public"]["Enums"]["task_status"];
+					team_id: string;
 					title: string;
 				};
 				Insert: {
-					created_at?: string | null;
-					created_by?: string | null;
+					created_at?: string;
+					created_by?: string;
 					description?: string | null;
 					due_date?: string | null;
 					id?: string;
-					priority?: number | null;
-					status?: string | null;
-					team_id?: string | null;
+					priority?: Database["public"]["Enums"]["task_priority"];
+					status?: Database["public"]["Enums"]["task_status"];
+					team_id: string;
 					title: string;
 				};
 				Update: {
-					created_at?: string | null;
-					created_by?: string | null;
+					created_at?: string;
+					created_by?: string;
 					description?: string | null;
 					due_date?: string | null;
 					id?: string;
-					priority?: number | null;
-					status?: string | null;
-					team_id?: string | null;
+					priority?: Database["public"]["Enums"]["task_priority"];
+					status?: Database["public"]["Enums"]["task_status"];
+					team_id?: string;
 					title?: string;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "projects_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
 					{
 						foreignKeyName: "projects_created_by_fkey";
 						columns: ["created_by"];
@@ -406,45 +614,103 @@ export type Database = {
 			};
 			roles: {
 				Row: {
-					created_at: string | null;
+					created_at: string;
 					description: string | null;
 					id: string;
 					name: string;
 				};
 				Insert: {
-					created_at?: string | null;
+					created_at?: string;
 					description?: string | null;
 					id?: string;
 					name: string;
 				};
 				Update: {
-					created_at?: string | null;
+					created_at?: string;
 					description?: string | null;
 					id?: string;
 					name?: string;
 				};
 				Relationships: [];
 			};
+			task_assignments: {
+				Row: {
+					task_id: string;
+					user_id: string;
+				};
+				Insert: {
+					task_id?: string;
+					user_id?: string;
+				};
+				Update: {
+					task_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "task_assignments_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
+						referencedRelation: "task_labels_view";
+						referencedColumns: ["task_id"];
+					},
+					{
+						foreignKeyName: "task_assignments_task_id_fkey";
+						columns: ["task_id"];
+						isOneToOne: false;
+						referencedRelation: "tasks";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "task_assignments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "task_assignments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "task_assignments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "task_assignments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
 			task_attachments: {
 				Row: {
-					created_at: string | null;
+					created_at: string;
 					id: string;
-					task_id: string | null;
-					uploaded_by: string | null;
+					task_id: string;
+					uploaded_by: string;
 					url: string;
 				};
 				Insert: {
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
-					task_id?: string | null;
-					uploaded_by?: string | null;
+					task_id: string;
+					uploaded_by?: string;
 					url: string;
 				};
 				Update: {
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
-					task_id?: string | null;
-					uploaded_by?: string | null;
+					task_id?: string;
+					uploaded_by?: string;
 					url?: string;
 				};
 				Relationships: [
@@ -452,7 +718,7 @@ export type Database = {
 						foreignKeyName: "task_attachments_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
@@ -466,6 +732,27 @@ export type Database = {
 						foreignKeyName: "task_attachments_uploaded_by_fkey";
 						columns: ["uploaded_by"];
 						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "task_attachments_uploaded_by_fkey";
+						columns: ["uploaded_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "task_attachments_uploaded_by_fkey";
+						columns: ["uploaded_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "task_attachments_uploaded_by_fkey";
+						columns: ["uploaded_by"];
+						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
@@ -473,32 +760,32 @@ export type Database = {
 			};
 			task_comments: {
 				Row: {
-					content: string | null;
-					created_at: string | null;
+					content: string;
+					created_at: string;
 					id: string;
-					task_id: string | null;
-					user_id: string | null;
+					task_id: string;
+					user_id: string;
 				};
 				Insert: {
-					content?: string | null;
-					created_at?: string | null;
+					content: string;
+					created_at?: string;
 					id?: string;
-					task_id?: string | null;
-					user_id?: string | null;
+					task_id: string;
+					user_id?: string;
 				};
 				Update: {
-					content?: string | null;
-					created_at?: string | null;
+					content?: string;
+					created_at?: string;
 					id?: string;
-					task_id?: string | null;
-					user_id?: string | null;
+					task_id?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
 						foreignKeyName: "task_comments_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
@@ -507,6 +794,27 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: "tasks";
 						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "task_comments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "task_comments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "task_comments_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
 					},
 					{
 						foreignKeyName: "task_comments_user_id_fkey";
@@ -542,14 +850,14 @@ export type Database = {
 						foreignKeyName: "task_labels_label_id_fkey";
 						columns: ["label_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["label_id"];
 					},
 					{
 						foreignKeyName: "task_labels_task_id_fkey";
 						columns: ["task_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
@@ -563,57 +871,68 @@ export type Database = {
 			};
 			tasks: {
 				Row: {
-					assigned_to: string | null;
-					created_at: string | null;
-					created_by: string | null;
+					created_at: string;
+					created_by: string;
 					description: string | null;
 					due_date: string | null;
 					id: string;
 					parent_task_id: string | null;
 					percent: number | null;
-					priority: number | null;
-					project_id: string | null;
+					priority: Database["public"]["Enums"]["task_priority"];
+					project_id: string;
 					start_date: string | null;
-					status: string | null;
+					status: Database["public"]["Enums"]["task_status"];
 					title: string;
 				};
 				Insert: {
-					assigned_to?: string | null;
-					created_at?: string | null;
-					created_by?: string | null;
+					created_at?: string;
+					created_by?: string;
 					description?: string | null;
 					due_date?: string | null;
 					id?: string;
 					parent_task_id?: string | null;
 					percent?: number | null;
-					priority?: number | null;
-					project_id?: string | null;
+					priority?: Database["public"]["Enums"]["task_priority"];
+					project_id: string;
 					start_date?: string | null;
-					status?: string | null;
+					status?: Database["public"]["Enums"]["task_status"];
 					title: string;
 				};
 				Update: {
-					assigned_to?: string | null;
-					created_at?: string | null;
-					created_by?: string | null;
+					created_at?: string;
+					created_by?: string;
 					description?: string | null;
 					due_date?: string | null;
 					id?: string;
 					parent_task_id?: string | null;
 					percent?: number | null;
-					priority?: number | null;
-					project_id?: string | null;
+					priority?: Database["public"]["Enums"]["task_priority"];
+					project_id?: string;
 					start_date?: string | null;
-					status?: string | null;
+					status?: Database["public"]["Enums"]["task_status"];
 					title?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "tasks_assigned_to_fkey";
-						columns: ["assigned_to"];
+						foreignKeyName: "tasks_created_by_fkey";
+						columns: ["created_by"];
 						isOneToOne: false;
-						referencedRelation: "users";
-						referencedColumns: ["id"];
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "tasks_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "tasks_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
 					},
 					{
 						foreignKeyName: "tasks_created_by_fkey";
@@ -626,7 +945,7 @@ export type Database = {
 						foreignKeyName: "tasks_parent_task_id_fkey";
 						columns: ["parent_task_id"];
 						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
@@ -640,13 +959,6 @@ export type Database = {
 						foreignKeyName: "tasks_project_id_fkey";
 						columns: ["project_id"];
 						isOneToOne: false;
-						referencedRelation: "project_with_team_view";
-						referencedColumns: ["project_id"];
-					},
-					{
-						foreignKeyName: "tasks_project_id_fkey";
-						columns: ["project_id"];
-						isOneToOne: false;
 						referencedRelation: "projects";
 						referencedColumns: ["id"];
 					}
@@ -655,21 +967,21 @@ export type Database = {
 			team_members: {
 				Row: {
 					id: string;
-					joined_at: string | null;
-					team_id: string | null;
-					user_id: string | null;
+					joined_at: string;
+					team_id: string;
+					user_id: string;
 				};
 				Insert: {
 					id?: string;
-					joined_at?: string | null;
-					team_id?: string | null;
-					user_id?: string | null;
+					joined_at?: string;
+					team_id: string;
+					user_id: string;
 				};
 				Update: {
 					id?: string;
-					joined_at?: string | null;
-					team_id?: string | null;
-					user_id?: string | null;
+					joined_at?: string;
+					team_id?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -683,6 +995,27 @@ export type Database = {
 						foreignKeyName: "team_members_user_id_fkey";
 						columns: ["user_id"];
 						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "team_members_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "team_members_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "team_members_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
@@ -690,19 +1023,19 @@ export type Database = {
 			};
 			teams: {
 				Row: {
-					created_at: string | null;
+					created_at: string;
 					description: string | null;
 					id: string;
 					name: string;
 				};
 				Insert: {
-					created_at?: string | null;
+					created_at?: string;
 					description?: string | null;
 					id?: string;
 					name: string;
 				};
 				Update: {
-					created_at?: string | null;
+					created_at?: string;
 					description?: string | null;
 					id?: string;
 					name?: string;
@@ -711,28 +1044,28 @@ export type Database = {
 			};
 			user_roles: {
 				Row: {
-					assigned_at: string | null;
+					assigned_at: string;
 					context_id: string | null;
-					context_type: string | null;
+					context_type: string;
 					id: string;
-					role_id: string | null;
-					user_id: string | null;
+					role_id: string;
+					user_id: string;
 				};
 				Insert: {
-					assigned_at?: string | null;
+					assigned_at?: string;
 					context_id?: string | null;
-					context_type?: string | null;
+					context_type?: string;
 					id?: string;
-					role_id?: string | null;
-					user_id?: string | null;
+					role_id: string;
+					user_id: string;
 				};
 				Update: {
-					assigned_at?: string | null;
+					assigned_at?: string;
 					context_id?: string | null;
-					context_type?: string | null;
+					context_type?: string;
 					id?: string;
-					role_id?: string | null;
-					user_id?: string | null;
+					role_id?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
@@ -753,6 +1086,27 @@ export type Database = {
 						foreignKeyName: "user_roles_user_id_fkey";
 						columns: ["user_id"];
 						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "user_roles_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "user_roles_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "user_roles_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
@@ -761,57 +1115,122 @@ export type Database = {
 			users: {
 				Row: {
 					avatar_url: string | null;
-					created_at: string | null;
-					full_name: string | null;
+					created_at: string;
+					full_name: string;
 					id: string;
 				};
 				Insert: {
 					avatar_url?: string | null;
-					created_at?: string | null;
-					full_name?: string | null;
+					created_at?: string;
+					full_name: string;
 					id: string;
 				};
 				Update: {
 					avatar_url?: string | null;
-					created_at?: string | null;
-					full_name?: string | null;
+					created_at?: string;
+					full_name?: string;
 					id?: string;
 				};
 				Relationships: [];
 			};
 		};
 		Views: {
-			project_with_team_view: {
+			bill_approval_view: {
 				Row: {
-					created_by: string | null;
+					amount: number | null;
+					approved_amount: number | null;
+					approved_at: string | null;
+					approver_avatar: string | null;
+					approver_id: string | null;
+					approver_name: string | null;
 					description: string | null;
-					due_date: string | null;
-					priority: number | null;
-					project_created_at: string | null;
-					project_id: string | null;
-					status: string | null;
-					team_created_at: string | null;
-					team_description: string | null;
-					team_id: string | null;
-					team_name: string | null;
-					title: string | null;
+					employee_avatar: string | null;
+					employee_id: string | null;
+					employee_name: string | null;
+					id: string | null;
+					receipt_url: string | null;
+					reimbursed_at: string | null;
+					status: Database["public"]["Enums"]["bill_status"] | null;
+					submitted_at: string | null;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "projects_created_by_fkey";
-						columns: ["created_by"];
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approver_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approver_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approver_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_approved_by_fkey";
+						columns: ["approver_id"];
 						isOneToOne: false;
 						referencedRelation: "users";
 						referencedColumns: ["id"];
 					},
 					{
-						foreignKeyName: "projects_team_id_fkey";
-						columns: ["team_id"];
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["employee_id"];
 						isOneToOne: false;
-						referencedRelation: "teams";
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["creator_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["employee_id"];
+						isOneToOne: false;
+						referencedRelation: "budget_detailed_view";
+						referencedColumns: ["payer_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["employee_id"];
+						isOneToOne: false;
+						referencedRelation: "task_assignments_view";
+						referencedColumns: ["user_id"];
+					},
+					{
+						foreignKeyName: "bill_approval_user_id_fkey";
+						columns: ["employee_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
 						referencedColumns: ["id"];
 					}
 				];
+			};
+			budget_detailed_view: {
+				Row: {
+					amount: number | null;
+					category: string | null;
+					created_at: string | null;
+					creator_avatar: string | null;
+					creator_id: string | null;
+					creator_name: string | null;
+					date: string | null;
+					description: string | null;
+					entry_type:
+						| Database["public"]["Enums"]["budget_entry_type"]
+						| null;
+					id: string | null;
+					payer_avatar: string | null;
+					payer_id: string | null;
+					payer_name: string | null;
+				};
+				Relationships: [];
 			};
 			role_with_permissions_view: {
 				Row: {
@@ -825,72 +1244,59 @@ export type Database = {
 				};
 				Relationships: [];
 			};
-			task_summary_view: {
+			task_assignments_view: {
 				Row: {
-					assigned_to: string | null;
 					assigned_user_avatar: string | null;
 					assigned_user_name: string | null;
-					description: string | null;
-					due_date: string | null;
-					label_color: string | null;
-					label_id: string | null;
-					label_name: string | null;
-					parent_task_id: string | null;
-					percent: number | null;
-					priority: number | null;
-					project_id: string | null;
-					start_date: string | null;
-					status: string | null;
 					task_id: string | null;
-					title: string | null;
+					user_id: string | null;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "tasks_assigned_to_fkey";
-						columns: ["assigned_to"];
+						foreignKeyName: "task_assignments_task_id_fkey";
+						columns: ["task_id"];
 						isOneToOne: false;
-						referencedRelation: "users";
-						referencedColumns: ["id"];
-					},
-					{
-						foreignKeyName: "tasks_parent_task_id_fkey";
-						columns: ["parent_task_id"];
-						isOneToOne: false;
-						referencedRelation: "task_summary_view";
+						referencedRelation: "task_labels_view";
 						referencedColumns: ["task_id"];
 					},
 					{
-						foreignKeyName: "tasks_parent_task_id_fkey";
-						columns: ["parent_task_id"];
+						foreignKeyName: "task_assignments_task_id_fkey";
+						columns: ["task_id"];
 						isOneToOne: false;
 						referencedRelation: "tasks";
-						referencedColumns: ["id"];
-					},
-					{
-						foreignKeyName: "tasks_project_id_fkey";
-						columns: ["project_id"];
-						isOneToOne: false;
-						referencedRelation: "project_with_team_view";
-						referencedColumns: ["project_id"];
-					},
-					{
-						foreignKeyName: "tasks_project_id_fkey";
-						columns: ["project_id"];
-						isOneToOne: false;
-						referencedRelation: "projects";
 						referencedColumns: ["id"];
 					}
 				];
 			};
+			task_labels_view: {
+				Row: {
+					label_color: string | null;
+					label_id: string | null;
+					label_name: string | null;
+					task_id: string | null;
+				};
+				Relationships: [];
+			};
 		};
 		Functions: {
+			get_attendance_by_date: {
+				Args: { target_date: string };
+				Returns: {
+					attending: Json;
+					not_attending: Json;
+					undecided: Json;
+				}[];
+			};
 			is_admin: {
 				Args: Record<PropertyKey, never>;
 				Returns: boolean;
 			};
 		};
 		Enums: {
-			[_ in never]: never;
+			bill_status: "uploaded" | "approved" | "reimbursed" | "rejected";
+			budget_entry_type: "actual" | "planned";
+			task_priority: "none" | "low" | "medium" | "high";
+			task_status: "planning" | "not_started" | "in_progress" | "done";
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -1005,6 +1411,11 @@ export type CompositeTypes<
 
 export const Constants = {
 	public: {
-		Enums: {},
+		Enums: {
+			bill_status: ["uploaded", "approved", "reimbursed", "rejected"],
+			budget_entry_type: ["actual", "planned"],
+			task_priority: ["none", "low", "medium", "high"],
+			task_status: ["planning", "not_started", "in_progress", "done"],
+		},
 	},
 } as const;
