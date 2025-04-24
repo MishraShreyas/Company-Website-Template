@@ -1146,18 +1146,21 @@ export type Database = {
 					created_at: string;
 					full_name: string;
 					id: string;
+					position: string;
 				};
 				Insert: {
 					avatar_url?: string | null;
 					created_at?: string;
 					full_name: string;
 					id: string;
+					position?: string;
 				};
 				Update: {
 					avatar_url?: string | null;
 					created_at?: string;
 					full_name?: string;
 					id?: string;
+					position?: string;
 				};
 				Relationships: [];
 			};
@@ -1274,7 +1277,7 @@ export type Database = {
 					status: Database["public"]["Enums"]["task_status"] | null;
 					team_created_at: string | null;
 					team_description: string | null;
-					team_id: string | null;
+					team_id: string;
 					team_name: string | null;
 				};
 				Relationships: [
@@ -1355,12 +1358,19 @@ export type Database = {
 			};
 		};
 		Functions: {
-			get_attendance_by_date: {
+			get_attendance: {
 				Args: { target_date: string };
 				Returns: {
-					attending: Json;
-					not_attending: Json;
-					undecided: Json;
+					meeting_date: string;
+					attending: Array<
+						Database["public"]["Tables"]["users"]["Row"]
+					>;
+					not_attending: Array<
+						Database["public"]["Tables"]["users"]["Row"]
+					>;
+					undecided: Array<
+						Database["public"]["Tables"]["users"]["Row"]
+					>;
 				}[];
 			};
 			is_admin: {

@@ -197,7 +197,7 @@ export async function getTaskSummary(
 	// 	return acc;
 	// }, [] as TaskSummary[]);
 
-	return [];
+	return data as unknown as TaskSummary[]; // Cast needed due to complex select + processing
 }
 
 /**

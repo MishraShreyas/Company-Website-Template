@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import {
 	IconArrowLeft,
 	IconBrandTabler,
+	IconCalendarCheck,
 	IconSettings,
 	IconUserBolt,
 } from "@tabler/icons-react";
@@ -17,6 +18,8 @@ import {
 	SidebarBody,
 	SidebarAttendance,
 	SidebarLink,
+	SidebarThemeSwitcher,
+	Links,
 } from "../ui/sidebar";
 
 interface SidebarLayoutProps {
@@ -24,8 +27,8 @@ interface SidebarLayoutProps {
 	subdomain: null | "admin" | "employee";
 }
 
-export function SidebarLayout({ children }: SidebarLayoutProps) {
-	const links = [
+export function SidebarLayout({ subdomain, children }: SidebarLayoutProps) {
+	const links: Links[] = [
 		{
 			label: "Dashboard",
 			href: "/",
@@ -33,6 +36,19 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 				<IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
 			),
 		},
+
+		...(subdomain === "admin"
+			? ([
+					{
+						label: "Attendance Report",
+						href: "/attendance",
+						icon: (
+							<IconCalendarCheck className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+						),
+					},
+			  ] as Links[])
+			: []),
+
 		{
 			label: "Profile",
 			href: "#",
@@ -112,6 +128,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 						</div>
 					</div>
 					<div className="space-y-2">
+						<SidebarThemeSwitcher />
 						{!initialLoading &&
 							user &&
 							(meetingToday === null ? (
@@ -166,12 +183,13 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 					</div>
 				</SidebarBody>
 			</Sidebar>
-			<div className="flex h-dvh w-full overflow-y-auto flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+			<div className="flex h-dvh w-full overflow-y-auto flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-5 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
 				{children}
 			</div>
 		</div>
 	);
 }
+
 export const Logo = () => {
 	return (
 		<Link

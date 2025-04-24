@@ -11,9 +11,8 @@ import {
 	RoleWithPermissions,
 	TeamWithMembers,
 } from "@/lib/db";
-import { Attendance, getAllMeetingUsers } from "@/lib/db/meeting_attendance";
 import { Database } from "@/types/database.types";
-import { Chip, Skeleton } from "@heroui/react";
+import { Skeleton } from "@heroui/react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -25,12 +24,6 @@ export function AdminHome() {
 	const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
 	const [teams, setTeams] = useState<TeamWithMembers[]>([]);
 	const [allUsers, setAllUsers] = useState<User[]>([]);
-
-	const [meetingToday, setMeetingToday] = useState<Attendance>({
-		attending: [],
-		not_attending: [],
-		undecided: [],
-	});
 
 	const [loading, setLoading] = useState(true);
 
@@ -118,13 +111,11 @@ export function AdminHome() {
 			const allPermissions = await getPermissions();
 			const allUsers = await getAllUsers();
 			const teams = await getAllTeams();
-			const meeters = await getAllMeetingUsers();
 
 			setRoles(roles);
 			setAllPermissions(allPermissions);
 			setAllUsers(allUsers);
 			setTeams(teams);
-			setMeetingToday(meeters);
 
 			setLoading(false);
 		}
@@ -153,61 +144,6 @@ export function AdminHome() {
 				Welcome to the admin dashboard. Here you can manage users,
 				roles, and permissions.
 			</motion.p>
-			<motion.p
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={{ opacity: 0, y: -20 }}
-				transition={{ duration: 0.3, ease: "easeInOut" }}
-				className="text-gray-600 dark:text-gray-400"
-			>
-				The people attending today are:{" "}
-				<i>{meetingToday.attending.length}</i>
-			</motion.p>
-			{meetingToday.attending.length > 0 && (
-				<div className="flex flex-wrap gap-2 mb-4">
-					{meetingToday.attending.map((user) => (
-						<Chip color="primary" key={user.id}>
-							{user.full_name}
-						</Chip>
-					))}
-				</div>
-			)}
-			<motion.p
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={{ opacity: 0, y: -20 }}
-				transition={{ duration: 0.3, ease: "easeInOut" }}
-				className="text-gray-600 dark:text-gray-400"
-			>
-				The people not attending today are:{" "}
-				<i>{meetingToday.not_attending.length}</i>
-			</motion.p>
-			{meetingToday.not_attending.length > 0 && (
-				<div className="flex flex-wrap gap-2 mb-4">
-					{meetingToday.not_attending.map((user) => (
-						<Chip color="warning" key={user.id}>
-							{user.full_name}
-						</Chip>
-					))}
-				</div>
-			)}
-			<motion.p
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={{ opacity: 0, y: -20 }}
-				transition={{ duration: 0.3, ease: "easeInOut" }}
-				className="text-gray-600 dark:text-gray-400"
-			>
-				The people undecided today are:{" "}
-				<i>{meetingToday.undecided.length}</i>
-			</motion.p>
-			{meetingToday.undecided.length > 0 && (
-				<div className="flex flex-wrap gap-2 mb-4">
-					{meetingToday.undecided.map((user) => (
-						<Chip key={user.id}>{user.full_name}</Chip>
-					))}
-				</div>
-			)}
 			<motion.div
 				initial={{ opacity: 0, y: -20 }}
 				animate={{ opacity: 1, y: 0 }}

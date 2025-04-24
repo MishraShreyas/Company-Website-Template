@@ -54,6 +54,7 @@ export function UserManagement({
 			id: "new",
 			full_name: "",
 			avatar_url: null,
+			position: "",
 			created_at: new Date().toISOString(),
 		});
 	};
@@ -74,6 +75,7 @@ export function UserManagement({
 		setLoading(true);
 		const formData = new FormData(e.target as HTMLFormElement);
 		const fullName = formData.get("fullName") as string;
+		const position = formData.get("position") as string;
 		const email = formData.get("email") as string;
 		const avatarUrl = formData.get("avatarUrl") as string;
 		const password = formData.get("password") as string;
@@ -105,12 +107,18 @@ export function UserManagement({
 						return;
 					}
 
-					updatedUser = await createUser(fullName, email, password);
+					updatedUser = await createUser(
+						fullName,
+						position,
+						email,
+						password
+					);
 					newUser = true;
 				} else {
 					updatedUser = await updateUser({
 						full_name: fullName,
 						id: active.id,
+						position: position,
 						avatar_url: avatarUrl || "",
 					});
 				}
@@ -275,6 +283,15 @@ export function UserManagement({
 													active.full_name || ""
 												}
 											/>
+											<Input
+												isRequired
+												errorMessage="Please enter a position"
+												name="position"
+												label="Position"
+												defaultValue={
+													active.position || ""
+												}
+											/>
 
 											{active.id === "new" ? (
 												<>
@@ -410,7 +427,8 @@ export function UserManagement({
 										layoutId={`title-${user.id}-${id}`}
 										className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left"
 									>
-										{user.full_name}
+										<b>{user.full_name}</b> -{" "}
+										{user.position}
 									</motion.h3>
 								</div>
 							</CardHeader>

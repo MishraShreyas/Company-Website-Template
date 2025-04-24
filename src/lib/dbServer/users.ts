@@ -7,6 +7,7 @@ type UserInsert = Database["public"]["Tables"]["users"]["Insert"];
 
 export async function createUser(
 	name: string,
+	position: string,
 	email: string,
 	password: string
 ) {
@@ -29,6 +30,7 @@ export async function createUser(
 		id: newUser.id,
 		full_name: name,
 		created_at: new Date().toISOString(),
+		position: position,
 	};
 
 	const { data, error } = await supabase

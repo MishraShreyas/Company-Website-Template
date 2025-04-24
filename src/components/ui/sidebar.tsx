@@ -1,12 +1,13 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Spinner } from "@heroui/react";
-import { IconMenu2, IconX } from "@tabler/icons-react";
+import { Button, Spinner } from "@heroui/react";
+import { IconMenu2, IconMoon, IconSun, IconX } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useTheme } from "next-themes";
 import Link, { LinkProps } from "next/link";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-interface Links {
+export interface Links {
 	label: string;
 	href: string;
 	icon: React.JSX.Element | React.ReactNode;
@@ -156,7 +157,43 @@ export const MobileSidebar = ({
 	);
 };
 
-interface SidebarButtonProps {
+export function SidebarThemeSwitcher() {
+	const [mounted, setMounted] = useState(false);
+	const { theme, setTheme } = useTheme();
+
+	const toggleTheme = () => {
+		setTheme(theme === "dark" ? "light" : "dark");
+	};
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) return null;
+
+	return (
+		<Button
+			isIconOnly
+			variant="light"
+			onPress={toggleTheme}
+			className="-translate-x-2"
+		>
+			{theme === "dark" ? (
+				<IconSun
+					size={20}
+					className="text-neutral-600 dark:text-neutral-300"
+				/>
+			) : (
+				<IconMoon
+					size={20}
+					className="text-neutral-600 dark:text-neutral-300"
+				/>
+			)}
+		</Button>
+	);
+}
+
+interface SidebarAttendanceProps {
 	className?: string;
 	onPress?: () => void;
 	loading?: boolean;
@@ -169,7 +206,7 @@ export const SidebarAttendance = ({
 	loading,
 	children,
 	...props
-}: SidebarButtonProps) => {
+}: SidebarAttendanceProps) => {
 	const { open, animate } = useSidebar();
 	return (
 		<motion.button
@@ -207,7 +244,7 @@ export const SidebarAttendance = ({
 					translateX: animate ? (open ? 0 : -20) : 0,
 					opacity: animate ? (open ? 1 : 0) : 1,
 				}}
-				className="text-neutral-700 dark:text-neutral-200 text-sm whitespace-pre inline-block text-center !p-0 !m-0"
+				className="text-neutral-200 text-sm whitespace-pre inline-block text-center !p-0 !m-0"
 			>
 				{children}
 			</motion.span>

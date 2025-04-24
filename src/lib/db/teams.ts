@@ -162,6 +162,7 @@ export async function getTeamMembers(
 			full_name: member.users?.full_name || "",
 			avatar_url: member.users?.avatar_url || "",
 			created_at: member.users?.created_at || "",
+			position: member.users?.position || "",
 			joined_at: member.joined_at || "",
 		})) || [];
 

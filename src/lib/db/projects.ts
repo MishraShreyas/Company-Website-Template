@@ -1,11 +1,11 @@
-import { getAllUsers } from "@/lib/db/users";
+import { getTeamMembers } from "@/lib/db/teams";
 import { Database } from "@/types/database.types";
 import { createClient } from "@/utils/supabase/client";
 
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 type ProjectInsert = Database["public"]["Tables"]["projects"]["Insert"];
 type ProjectUpdate = Database["public"]["Tables"]["projects"]["Update"];
-type Team = Database["public"]["Tables"]["teams"]["Row"];
+// type Team = Database["public"]["Tables"]["teams"]["Row"];
 type User = Database["public"]["Tables"]["users"]["Row"]; // Assuming user type exists
 
 type ProjectWithTeamView =
@@ -72,26 +72,19 @@ export async function getAllProjects(): Promise<ProjectWithDetails[]> {
 
 	if (!data) return [] as ProjectWithDetails[];
 
-	const allUsers = await getAllUsers();
-
 	// group up team members by project
-	// const projectsWithMembers = await Promise.all(
-	// data.map(async (project) => {
-	//     const teamIds = getTeamMembers.
-	//     const team = allUsers.filter((user) => {
-	//         return project.team_members.some((member) => {
-	//             return member.user_id === user.id;
-	//         });
-	//     }
+	const projectsWithMembers = await Promise.all(
+		data.map(async (project) => {
+			const team = await getTeamMembers(project.team_id);
 
-	// 	return {
-	// 		team_members: team,
-	// 	} as ProjectWithDetails;
-	// })
-	// );
+			return {
+				...project,
+				team_members: team,
+			};
+		})
+	);
 
-	//
-	return [];
+	return projectsWithMembers;
 }
 
 // UPDATE Project
