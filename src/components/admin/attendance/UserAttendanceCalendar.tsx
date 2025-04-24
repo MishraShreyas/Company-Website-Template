@@ -43,6 +43,7 @@ export function UserAttendanceCalendar({
 						>
 							<Button
 								color={bgColor}
+								variant="flat"
 								className="w-full h-full min-w-10 flex items-center justify-center text-xs lg:text-md"
 								onPress={() =>
 									handleDateChange(parseDate(day.date))
