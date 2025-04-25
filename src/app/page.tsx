@@ -1,6 +1,7 @@
 "use server";
 
 import { AdminHome } from "@/components/admin/AdminHome";
+import { EmployeeHome } from "@/components/admin/employee/EmployeeHome";
 import { CustomerHome } from "@/components/customer/CustomerHome";
 import { getSubdomain } from "@/lib/server-utils";
 
@@ -11,11 +12,7 @@ export default async function Page() {
 		case "admin":
 			return <AdminHome />;
 		case "employee":
-			return <div>
-				<p className="text-3xl">
-					Employee Portal is WIP. Please use the navigation bar to mark attendance!
-				</p>
-			</div>;
+			return <EmployeeHome />;
 		default:
 			return <CustomerHome />;
 	}

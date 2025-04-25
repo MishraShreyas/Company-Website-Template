@@ -14,12 +14,23 @@ export type UserWithRole = User & {
 		| null;
 };
 
+export async function getSelfUser(): Promise<User | null> {
+	const supabase = createClient();
+	const { user } = (await supabase.auth.getUser()).data;
+	if (!user) throw new Error("User not authenticated.");
+
+	const { data, error } = await supabase.from("users").select("*").eq("id", user.id).single();
+
+	if (error) {
+		console.error("Error fetching user:", error);
+		return null;
+	}
+
+	return data;
+}
+
 export async function getUserById(userId: string): Promise<User | null> {
-	const { data, error } = await createClient()
-		.from("users")
-		.select("*")
-		.eq("id", userId)
-		.single();
+	const { data, error } = await createClient().from("users").select("*").eq("id", userId).single();
 
 	if (error) {
 		console.error("Error fetching user:", error);
@@ -36,11 +47,7 @@ export async function updateUser(userData: UserUpdate): Promise<User | null> {
 
 	if (!userData?.id) userData.id = user.id;
 
-	const { data, error } = await supabase
-		.from("users")
-		.update(userData)
-		.select("*")
-		.single();
+	const { data, error } = await supabase.from("users").update(userData).select("*").single();
 
 	if (error) {
 		console.error("Error updating user:", error);
@@ -52,10 +59,7 @@ export async function updateUser(userData: UserUpdate): Promise<User | null> {
 
 // get users
 export async function getAllUsers(): Promise<User[]> {
-	const { data, error } = await createClient()
-		.from("users")
-		.select("*")
-		.order("full_name", { ascending: true });
+	const { data, error } = await createClient().from("users").select("*").order("full_name", { ascending: true });
 
 	if (error) {
 		console.error("Error fetching users:", error);
@@ -68,20 +72,14 @@ export async function getAllUsers(): Promise<User[]> {
 // READ User with Role
 export async function getAllUsersWithRole(): Promise<UserWithRole[]> {
 	const supabase = createClient();
-	const { data, error } = await supabase
-		.from("users")
-		.select(`*`)
-		.order("full_name", { ascending: true });
+	const { data, error } = await supabase.from("users").select(`*`).order("full_name", { ascending: true });
 
 	if (error) {
 		console.error("Error fetching users:", error);
 		return [];
 	}
 
-	const { data: roles, error: rolesError } = await supabase
-		.from("roles")
-		.select(`*`)
-		.order("name", { ascending: true });
+	const { data: roles, error: rolesError } = await supabase.from("roles").select(`*`).order("name", { ascending: true });
 
 	if (rolesError) {
 		console.error("Error fetching roles:", rolesError);
@@ -90,10 +88,7 @@ export async function getAllUsersWithRole(): Promise<UserWithRole[]> {
 
 	const users = await Promise.all(
 		data.map(async (user) => {
-			const { data: userRoles, error: userRolesError } = await supabase
-				.from("user_roles")
-				.select(`*`)
-				.eq("user_id", user.id);
+			const { data: userRoles, error: userRolesError } = await supabase.from("user_roles").select(`*`).eq("user_id", user.id);
 
 			if (userRolesError) {
 				console.error("Error fetching user roles:", userRolesError);

@@ -5,7 +5,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ---> Everytime you update database types:
 
 -   replace the json in get_attendance function with Array<Database["public"]["Tables"]["users"]["Row"]>
--   remove null from projects_with_team_view team_id
+-   remove null from projects_with_team_view team_id & project_id
 
 First, run the development server:
 

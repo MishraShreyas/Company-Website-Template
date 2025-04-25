@@ -3,14 +3,7 @@
 import { RoleManagement } from "@/components/admin/RoleManagement";
 import { TeamManagement } from "@/components/admin/TeamManagement";
 import { UserManagement } from "@/components/admin/UserManagement";
-import {
-	getAllRoles,
-	getAllTeams,
-	getAllUsers,
-	getPermissions,
-	RoleWithPermissions,
-	TeamWithMembers,
-} from "@/lib/db";
+import { getAllRoles, getAllTeams, getAllUsers, getPermissions, RoleWithPermissions, TeamWithMembers } from "@/lib/db";
 import { Database } from "@/types/database.types";
 import { Skeleton } from "@heroui/react";
 import { motion } from "motion/react";
@@ -27,11 +20,7 @@ export function AdminHome() {
 
 	const [loading, setLoading] = useState(true);
 
-	const updateRole = (
-		roleId: string,
-		role: RoleWithPermissions,
-		newRole: boolean | null
-	) => {
+	const updateRole = (roleId: string, role: RoleWithPermissions, newRole: boolean | null) => {
 		if (newRole === null) {
 			setRoles((prev) => prev.filter((r) => r.id !== roleId));
 		}
@@ -53,11 +42,7 @@ export function AdminHome() {
 		setRoles(updatedRoles);
 	};
 
-	const updateTeamLocal = (
-		teamId: string,
-		team: TeamWithMembers,
-		newTeam: boolean | null
-	) => {
+	const updateTeamLocal = (teamId: string, team: TeamWithMembers, newTeam: boolean | null) => {
 		if (newTeam === null) {
 			setTeams((prev) => prev.filter((t) => t.id !== teamId));
 		}
@@ -79,11 +64,7 @@ export function AdminHome() {
 		setTeams(updatedTeams);
 	};
 
-	const updateUserLocal = (
-		userId: string,
-		user: User,
-		newUser: boolean | null
-	) => {
+	const updateUserLocal = (userId: string, user: User, newUser: boolean | null) => {
 		if (newUser === null) {
 			setAllUsers((prev) => prev.filter((u) => u.id !== userId));
 		}
@@ -112,6 +93,8 @@ export function AdminHome() {
 			const allUsers = await getAllUsers();
 			const teams = await getAllTeams();
 
+			console.log(teams);
+
 			setRoles(roles);
 			setAllPermissions(allPermissions);
 			setAllUsers(allUsers);
@@ -130,7 +113,7 @@ export function AdminHome() {
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -20 }}
 				transition={{ duration: 0.3, ease: "easeInOut" }}
-				className="text-2xl font-bold text-gray-800 dark:text-gray-200"
+				className="text-2xl font-bold text-foreground"
 			>
 				Admin Home
 			</motion.h1>
@@ -139,10 +122,9 @@ export function AdminHome() {
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -20 }}
 				transition={{ duration: 0.3, ease: "easeInOut" }}
-				className="text-gray-600 dark:text-gray-400"
+				className="text-default-500"
 			>
-				Welcome to the admin dashboard. Here you can manage users,
-				roles, and permissions.
+				Welcome to the admin dashboard. Here you can manage users, roles, and permissions.
 			</motion.p>
 			<motion.div
 				initial={{ opacity: 0, y: -20 }}
@@ -155,11 +137,7 @@ export function AdminHome() {
 					{loading ? (
 						<Skeleton className="h-20 w-full" />
 					) : (
-						<RoleManagement
-							roles={roles}
-							allPermissions={allPermissions}
-							updateRoleLocal={updateRole}
-						/>
+						<RoleManagement roles={roles} allPermissions={allPermissions} updateRoleLocal={updateRole} />
 					)}
 				</div>
 
@@ -167,24 +145,11 @@ export function AdminHome() {
 					{loading ? (
 						<Skeleton className="h-20 w-full" />
 					) : (
-						<TeamManagement
-							teams={teams}
-							users={allUsers}
-							updateTeamLocal={updateTeamLocal}
-						/>
+						<TeamManagement teams={teams} users={allUsers} updateTeamLocal={updateTeamLocal} />
 					)}
 				</div>
 
-				<div>
-					{loading ? (
-						<Skeleton className="h-20 w-full" />
-					) : (
-						<UserManagement
-							users={allUsers}
-							updateUserLocal={updateUserLocal}
-						/>
-					)}
-				</div>
+				<div>{loading ? <Skeleton className="h-20 w-full" /> : <UserManagement users={allUsers} updateUserLocal={updateUserLocal} />}</div>
 			</motion.div>
 		</div>
 	);

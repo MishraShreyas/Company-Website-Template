@@ -3,13 +3,7 @@
 import React, { RefObject, useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import {
-	createRole,
-	deleteRole,
-	permissionGrouper,
-	RoleWithPermissions,
-	updateRole,
-} from "@/lib/db";
+import { createRole, deleteRole, permissionGrouper, RoleWithPermissions, updateRole } from "@/lib/db";
 import { addToast, Button, Card, CardHeader, Form, Input } from "@heroui/react";
 import { IconEdit, IconPlus } from "@tabler/icons-react";
 import { Database } from "@/types/database.types";
@@ -20,29 +14,17 @@ type Permissions = Database["public"]["Tables"]["permissions"]["Row"];
 interface RoleManagementProps {
 	roles: RoleWithPermissions[];
 	allPermissions: Permissions[];
-	updateRoleLocal: (
-		roleId: string,
-		role: RoleWithPermissions,
-		newRole: boolean | null
-	) => void;
+	updateRoleLocal: (roleId: string, role: RoleWithPermissions, newRole: boolean | null) => void;
 }
 
-export function RoleManagement({
-	roles,
-	allPermissions,
-	updateRoleLocal,
-}: RoleManagementProps) {
-	const [active, setActive] = useState<RoleWithPermissions | boolean | null>(
-		null
-	);
+export function RoleManagement({ roles, allPermissions, updateRoleLocal }: RoleManagementProps) {
+	const [active, setActive] = useState<RoleWithPermissions | boolean | null>(null);
 	const ref = useRef<HTMLDivElement>(null);
 	const id = useId();
 
 	const [loading, setLoading] = useState(false);
 
-	const [selectedPermissions, setSelectedPermissions] = useState<
-		Omit<Permissions, "description">[]
-	>([]);
+	const [selectedPermissions, setSelectedPermissions] = useState<Omit<Permissions, "description">[]>([]);
 	const permissionsDropdown = allPermissions.map((p) => ({
 		id: p.id,
 		name: `${p.name} - ${p.description}`,
@@ -164,7 +146,7 @@ export function RoleManagement({
 		<>
 			<div className="flex justify-between items-center mb-4">
 				<motion.h2
-					className="text-xl font-bold text-gray-800 dark:text-gray-200"
+					className="text-xl font-bold text-foreground"
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
@@ -214,22 +196,13 @@ export function RoleManagement({
 							ref={ref}
 							className="w-full max-w-[500px]  h-full md:h-fit md:max-h-[90%]  flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
 						>
-							<Form
-								onSubmit={updateRoleSubmit}
-								className="block gap-0"
-							>
+							<Form onSubmit={updateRoleSubmit} className="block gap-0">
 								<div className="flex justify-between items-start p-4">
 									<div className="">
-										<motion.h2
-											layoutId={`title-${active.id}-${id}`}
-											className="font-bold text-neutral-700 dark:text-neutral-200"
-										>
+										<motion.h2 layoutId={`title-${active.id}-${id}`} className="font-bold text-foreground">
 											{active.name}
 										</motion.h2>
-										<motion.p
-											layoutId={`description-${active.id}-${id}`}
-											className="text-neutral-600 dark:text-neutral-400 mt-2"
-										>
+										<motion.p layoutId={`description-${active.id}-${id}`} className="text-default-500 mt-2">
 											{active.description}
 										</motion.p>
 									</div>
@@ -240,7 +213,7 @@ export function RoleManagement({
 										initial={{ opacity: 0 }}
 										animate={{ opacity: 1 }}
 										exit={{ opacity: 0 }}
-										className="text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+										className="text-default text-xs md:text-sm lg:text-base h-40 md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
 									>
 										<div className="w-full space-y-4">
 											<Input
@@ -255,45 +228,27 @@ export function RoleManagement({
 												errorMessage="Please enter a role description"
 												name="roleDescription"
 												label="Role Description"
-												defaultValue={
-													active.description || ""
-												}
+												defaultValue={active.description || ""}
 											/>
 
 											<MultiselectSearch
 												label="Permissions"
 												array={permissionsDropdown}
-												selectedItems={
-													selectedPermissions
-												}
-												setSelectedItems={
-													setSelectedPermissions
-												}
-												groupingFunction={
-													permissionGrouper
-												}
+												selectedItems={selectedPermissions}
+												setSelectedItems={setSelectedPermissions}
+												groupingFunction={permissionGrouper}
 											/>
 										</div>
 									</motion.div>
 								</div>
 								<div className="flex justify-end items-center p-4 gap-2">
 									{active.id !== "new" && (
-										<Button
-											onPress={deleteOpenRole}
-											isLoading={loading}
-											color="danger"
-										>
+										<Button onPress={deleteOpenRole} isLoading={loading} color="danger">
 											Delete
 										</Button>
 									)}
-									<Button
-										isLoading={loading}
-										type="submit"
-										color="success"
-									>
-										{active.id !== "new"
-											? "Save Changes"
-											: "Create Role"}
+									<Button isLoading={loading} type="submit" color="success">
+										{active.id !== "new" ? "Save Changes" : "Create Role"}
 									</Button>
 								</div>
 							</Form>
@@ -311,24 +266,18 @@ export function RoleManagement({
 					>
 						<Card className="w-full flex-row justify-between items-center group-hover:bg-neutral-50 dark:group-hover:bg-neutral-800">
 							<CardHeader className="w-fit">
-								<motion.h3
-									layoutId={`title-${role.name}-${id}`}
-									className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left"
-								>
+								<motion.h3 layoutId={`title-${role.name}-${id}`} className="font-medium text-foreground text-center md:text-left">
 									{role.name}
 								</motion.h3>
 								<motion.p
 									layoutId={`description-${role.description}-${id}`}
-									className="text-neutral-600 dark:text-neutral-400 text-center md:text-left ml-2"
+									className="text-default-500 text-center md:text-left ml-2"
 								>
 									{role.description}
 								</motion.p>
 							</CardHeader>
 
-							<Button
-								isIconOnly
-								className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400"
-							>
+							<Button isIconOnly className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400">
 								<IconEdit />
 							</Button>
 						</Card>

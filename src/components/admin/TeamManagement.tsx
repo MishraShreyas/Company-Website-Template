@@ -1,36 +1,36 @@
 "use client";
 
+import MultiselectSearch, { AutocompleteItemType } from "@/components/ui/multi-select-search";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { createTeam, deleteTeam, TeamWithMembers, updateTeam } from "@/lib/db";
 import { Database } from "@/types/database.types";
-import { Button, Card, CardHeader, Form, Input } from "@heroui/react";
+import { Button, Card, CardHeader, Form, Input, Snippet } from "@heroui/react";
 import { IconEdit, IconPlus } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { RefObject, useEffect, useId, useRef, useState } from "react";
 
+type User = Database["public"]["Tables"]["users"]["Row"];
+
 interface TeamManagementProps {
 	teams: TeamWithMembers[];
-	users: Database["public"]["Tables"]["users"]["Row"][];
-	updateTeamLocal: (
-		teamId: string,
-		team: TeamWithMembers,
-		newTeam: boolean | null
-	) => void;
+	users: User[];
+	updateTeamLocal: (teamId: string, team: TeamWithMembers, newTeam: boolean | null) => void;
 }
 
-export function TeamManagement({
-	teams,
-	updateTeamLocal,
-}: TeamManagementProps) {
-	const [active, setActive] = useState<TeamWithMembers | boolean | null>(
-		null
-	);
+export function TeamManagement({ teams, users, updateTeamLocal }: TeamManagementProps) {
+	const [active, setActive] = useState<TeamWithMembers | boolean | null>(null);
 	const ref = useRef<HTMLDivElement>(null);
 	const id = useId();
 
 	const [loading, setLoading] = useState(false);
 
+	const [selectedUsers, setSelectedUsers] = useState<AutocompleteItemType[]>([]);
+
+	const [selectedManagers, setSelectedManagers] = useState<AutocompleteItemType[]>([]);
+
 	const openNewTeam = () => {
+		setSelectedManagers([]);
+		setSelectedUsers([]);
 		setActive({
 			name: "New Team",
 			description: "New Team Description",
@@ -41,6 +41,12 @@ export function TeamManagement({
 	};
 
 	const selectTeam = (team: TeamWithMembers) => {
+		setSelectedUsers(
+			team.team_members.map((user) => ({
+				id: user.id,
+				name: user.full_name,
+			}))
+		);
 		setActive(team);
 	};
 
@@ -54,17 +60,25 @@ export function TeamManagement({
 		if (active && typeof active === "object") {
 			let newTeam = false;
 			if (active.id === "new") {
-				const createdTeam = await createTeam({
-					name: teamName,
-					description: teamDescription,
-				});
+				const createdTeam = await createTeam(
+					{
+						name: teamName,
+						description: teamDescription,
+					},
+					selectedUsers.map((user) => user.id),
+					selectedManagers.map((user) => user.id)
+				);
 				active.id = createdTeam.id;
 				newTeam = true;
 			} else {
-				await updateTeam(active.id, {
-					name: teamName,
-					description: teamDescription,
-				});
+				await updateTeam(
+					active.id,
+					{
+						name: teamName,
+						description: teamDescription,
+					},
+					selectedUsers.map((user) => user.id)
+				);
 			}
 
 			updateTeamLocal(
@@ -73,6 +87,7 @@ export function TeamManagement({
 					...active,
 					name: teamName,
 					description: teamDescription,
+					team_members: users.filter((user) => selectedUsers.some((selectedUser) => selectedUser.id === user.id)),
 				},
 				newTeam
 			);
@@ -117,7 +132,7 @@ export function TeamManagement({
 		<>
 			<div className="flex justify-between items-center mb-4">
 				<motion.h2
-					className="text-xl font-bold text-gray-800 dark:text-gray-200"
+					className="text-xl font-bold text-foreground"
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
@@ -165,24 +180,18 @@ export function TeamManagement({
 						<motion.div
 							layoutId={`card-${active.id}-${id}`}
 							ref={ref}
-							className="w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
+							className="relative w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
 						>
-							<Form
-								onSubmit={updateTeamSubmit}
-								className="block gap-0"
-							>
+							<Snippet hideSymbol color="secondary" codeString={active.id} size="sm" className="absolute top-4 right-4 hidden lg:flex">
+								id
+							</Snippet>
+							<Form onSubmit={updateTeamSubmit} className="block gap-0">
 								<div className="flex justify-between items-start p-4">
-									<div className="">
-										<motion.h2
-											layoutId={`title-${active.id}-${id}`}
-											className="font-bold text-neutral-700 dark:text-neutral-200"
-										>
+									<div className="space-y-2">
+										<motion.h2 layoutId={`title-${active.id}-${id}`} className="font-bold text-foreground">
 											{active.name}
 										</motion.h2>
-										<motion.p
-											layoutId={`description-${active.id}-${id}`}
-											className="text-neutral-600 dark:text-neutral-400 mt-2"
-										>
+										<motion.p layoutId={`description-${active.id}-${id}`} className="text-default-500">
 											{active.description}
 										</motion.p>
 									</div>
@@ -208,31 +217,41 @@ export function TeamManagement({
 												errorMessage="Please enter a team description"
 												name="teamDescription"
 												label="Team Description"
-												defaultValue={
-													active.description || ""
-												}
+												defaultValue={active.description || ""}
 											/>
+
+											<MultiselectSearch
+												label="Members"
+												array={users.map((u) => ({
+													id: u.id,
+													name: u.full_name,
+												}))}
+												selectedItems={selectedUsers}
+												setSelectedItems={setSelectedUsers}
+											/>
+
+											{active.id === "new" && (
+												<MultiselectSearch
+													label="Managers"
+													array={users.map((u) => ({
+														id: u.id,
+														name: u.full_name,
+													}))}
+													selectedItems={selectedManagers}
+													setSelectedItems={setSelectedManagers}
+												/>
+											)}
 										</div>
 									</motion.div>
 								</div>
 								<div className="flex justify-end items-center p-4 gap-2">
 									{active.id !== "new" && (
-										<Button
-											onPress={deleteOpenTeam}
-											isLoading={loading}
-											color="danger"
-										>
+										<Button onPress={deleteOpenTeam} isLoading={loading} color="danger">
 											Delete
 										</Button>
 									)}
-									<Button
-										isLoading={loading}
-										type="submit"
-										color="success"
-									>
-										{active.id !== "new"
-											? "Save Changes"
-											: "Create Team"}
+									<Button isLoading={loading} type="submit" color="success">
+										{active.id !== "new" ? "Save Changes" : "Create Team"}
 									</Button>
 								</div>
 							</Form>
@@ -250,24 +269,15 @@ export function TeamManagement({
 					>
 						<Card className="w-full flex-row justify-between items-center group-hover:bg-neutral-50 dark:group-hover:bg-neutral-800">
 							<CardHeader className="w-fit">
-								<motion.h3
-									layoutId={`title-${team.id}-${id}`}
-									className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left"
-								>
+								<motion.h3 layoutId={`title-${team.id}-${id}`} className="font-medium text-foreground text-center md:text-left">
 									{team.name}
 								</motion.h3>
-								<motion.p
-									layoutId={`description-${team.id}-${id}`}
-									className="text-neutral-600 dark:text-neutral-400 text-center md:text-left ml-2"
-								>
+								<motion.p layoutId={`description-${team.id}-${id}`} className="text-default-500 text-center md:text-left ml-2">
 									{team.description}
 								</motion.p>
 							</CardHeader>
 
-							<Button
-								isIconOnly
-								className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400"
-							>
+							<Button isIconOnly className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400">
 								<IconEdit />
 							</Button>
 						</Card>

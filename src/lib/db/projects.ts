@@ -8,28 +8,21 @@ type ProjectUpdate = Database["public"]["Tables"]["projects"]["Update"];
 // type Team = Database["public"]["Tables"]["teams"]["Row"];
 type User = Database["public"]["Tables"]["users"]["Row"]; // Assuming user type exists
 
-type ProjectWithTeamView =
-	Database["public"]["Views"]["projects_with_team_view"]["Row"];
+type ProjectWithTeamView = Database["public"]["Views"]["projects_with_team_view"]["Row"];
 
 export type ProjectWithDetails = ProjectWithTeamView & {
 	team_members: (User & { joined_at: string | null })[];
 };
 
 // CREATE Project
-export async function createProject(
-	projectData: ProjectInsert
-): Promise<Project> {
+export async function createProject(projectData: ProjectInsert): Promise<Project> {
 	const supabase = createClient();
 	const { user } = (await supabase.auth.getUser()).data;
 	if (!user) throw new Error("User not authenticated.");
 	projectData.created_by = user.id;
 	projectData.created_at = new Date().toISOString(); // Ensure created_at is set
 
-	const { data, error } = await supabase
-		.from("projects")
-		.insert(projectData)
-		.select()
-		.single();
+	const { data, error } = await supabase.from("projects").insert(projectData).select().single();
 
 	if (error) throw error;
 	if (!data) throw new Error("Project creation failed.");
@@ -38,35 +31,32 @@ export async function createProject(
 
 // READ Project Names
 export async function getProjectNames(): Promise<string[]> {
-	const { data, error } = await createClient()
-		.from("projects")
-		.select("title")
-		.order("title", { ascending: true });
+	const { data, error } = await createClient().from("projects").select("title").order("title", { ascending: true });
 
 	if (error) throw error;
 	return data.map((p) => p.title) || [];
 }
 
 // READ Project by ID with Details
-export async function getProjectByIdWithDetails(
-	projectId: string
-): Promise<ProjectWithDetails | null> {
-	const { data, error } = await createClient()
-		.from("projects_with_team_view")
-		.select(`*`)
-		.eq("id", projectId)
-		.single();
+export async function getProjectByIdWithDetails(projectId: string): Promise<ProjectWithDetails | null> {
+	const { data, error } = await createClient().from("projects_with_team_view").select(`*`).eq("project_id", projectId).single();
 
 	if (error && error.code !== "PGRST116") throw error;
-	return data as ProjectWithDetails | null;
+
+	if (!data) return null;
+
+	// group up team members by project
+	const team = await getTeamMembers(data.team_id);
+
+	return {
+		...data,
+		team_members: team,
+	};
 }
 
 // READ Projects with filtering and optional details
 export async function getAllProjects(): Promise<ProjectWithDetails[]> {
-	const { data, error } = await createClient()
-		.from("projects_with_team_view")
-		.select(`*`)
-		.order("created_at", { ascending: false });
+	const { data, error } = await createClient().from("projects_with_team_view").select(`*`).order("project_created_at", { ascending: false });
 
 	if (error) throw error;
 
@@ -88,16 +78,8 @@ export async function getAllProjects(): Promise<ProjectWithDetails[]> {
 }
 
 // UPDATE Project
-export async function updateProject(
-	projectId: string,
-	projectData: ProjectUpdate
-): Promise<Project> {
-	const { data, error } = await createClient()
-		.from("projects")
-		.update(projectData)
-		.eq("id", projectId)
-		.select()
-		.single();
+export async function updateProject(projectId: string, projectData: ProjectUpdate): Promise<Project> {
+	const { data, error } = await createClient().from("projects").update(projectData).eq("id", projectId).select().single();
 
 	if (error) throw error;
 	if (!data) throw new Error("Project update failed.");
@@ -108,9 +90,6 @@ export async function updateProject(
 export async function deleteProject(projectId: string): Promise<void> {
 	// Consider implications: What happens to tasks linked to this project?
 	// Set up 'ON DELETE SET NULL' or 'CASCADE' in your DB schema, or handle manually.
-	const { error } = await createClient()
-		.from("projects")
-		.delete()
-		.eq("id", projectId);
+	const { error } = await createClient().from("projects").delete().eq("id", projectId);
 	if (error) throw error;
 }

@@ -27,17 +27,10 @@ type User = Database["public"]["Tables"]["users"]["Row"];
 
 interface UserManagementProps {
 	users: User[];
-	updateUserLocal: (
-		userId: string,
-		user: User,
-		newUser: boolean | null
-	) => void;
+	updateUserLocal: (userId: string, user: User, newUser: boolean | null) => void;
 }
 
-export function UserManagement({
-	users,
-	updateUserLocal,
-}: UserManagementProps) {
+export function UserManagement({ users, updateUserLocal }: UserManagementProps) {
 	const [active, setActive] = useState<User | boolean | null>(null);
 	const ref = useRef<HTMLDivElement>(null);
 	const id = useId();
@@ -107,12 +100,7 @@ export function UserManagement({
 						return;
 					}
 
-					updatedUser = await createUser(
-						fullName,
-						position,
-						email,
-						password
-					);
+					updatedUser = await createUser(fullName, position, email, password);
 					newUser = true;
 				} else {
 					updatedUser = await updateUser({
@@ -142,8 +130,7 @@ export function UserManagement({
 			console.error("Error updating user:", error);
 			addToast({
 				title: "Error updating user",
-				description:
-					error instanceof Error ? error.message : "Unknown error",
+				description: error instanceof Error ? error.message : "Unknown error",
 				color: "danger",
 				timeout: 5000,
 			});
@@ -164,8 +151,7 @@ export function UserManagement({
 			console.error("Error deleting user:", error);
 			addToast({
 				title: "Error deleting user",
-				description:
-					error instanceof Error ? error.message : "Unknown error",
+				description: error instanceof Error ? error.message : "Unknown error",
 				color: "danger",
 				timeout: 5000,
 			});
@@ -197,7 +183,7 @@ export function UserManagement({
 		<>
 			<div className="flex justify-between items-center mb-4">
 				<motion.h2
-					className="text-xl font-bold text-gray-800 dark:text-gray-200"
+					className="text-xl font-bold text-foreground"
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
@@ -241,27 +227,14 @@ export function UserManagement({
 							ref={ref}
 							className="w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
 						>
-							<Form
-								onSubmit={updateUserSubmit}
-								className="block gap-0"
-							>
+							<Form onSubmit={updateUserSubmit} className="block gap-0">
 								<div className="flex justify-between items-start p-4">
 									<div className="">
-										<motion.h2
-											layoutId={`title-${active.id}-${id}`}
-											className="font-bold text-neutral-700 dark:text-neutral-200"
-										>
-											{active.id === "new"
-												? "Create New User"
-												: "Edit User"}
+										<motion.h2 layoutId={`title-${active.id}-${id}`} className="font-bold text-foreground">
+											{active.id === "new" ? "Create New User" : "Edit User"}
 										</motion.h2>
-										<motion.p
-											layoutId={`description-${active.id}-${id}`}
-											className="text-neutral-600 dark:text-neutral-400 mt-2"
-										>
-											{active.id === "new"
-												? "Enter details for the new user"
-												: active.full_name}
+										<motion.p layoutId={`description-${active.id}-${id}`} className="text-default-500 mt-2">
+											{active.id === "new" ? "Enter details for the new user" : active.full_name}
 										</motion.p>
 									</div>
 								</div>
@@ -279,18 +252,14 @@ export function UserManagement({
 												errorMessage="Please enter a full name"
 												name="fullName"
 												label="Full Name"
-												defaultValue={
-													active.full_name || ""
-												}
+												defaultValue={active.full_name || ""}
 											/>
 											<Input
 												isRequired
 												errorMessage="Please enter a position"
 												name="position"
 												label="Position"
-												defaultValue={
-													active.position || ""
-												}
+												defaultValue={active.position || ""}
 											/>
 
 											{active.id === "new" ? (
@@ -310,26 +279,14 @@ export function UserManagement({
 																className="focus:outline-none cursor-pointer"
 																type="button"
 																aria-label="Toggle password visibility"
-																onClick={() =>
-																	setViewPassword(
-																		!viewPassword
-																	)
-																}
+																onClick={() => setViewPassword(!viewPassword)}
 															>
-																{viewPassword ? (
-																	<Eye />
-																) : (
-																	<EyeOff />
-																)}
+																{viewPassword ? <Eye /> : <EyeOff />}
 															</button>
 														}
 														name="password"
 														label="Password"
-														type={
-															viewPassword
-																? "text"
-																: "password"
-														}
+														type={viewPassword ? "text" : "password"}
 														autoComplete="new-password"
 													/>
 													<Input
@@ -340,26 +297,14 @@ export function UserManagement({
 																className="focus:outline-none cursor-pointer"
 																type="button"
 																aria-label="Toggle password visibility"
-																onClick={() =>
-																	setViewConfirmPassword(
-																		!viewConfirmPassword
-																	)
-																}
+																onClick={() => setViewConfirmPassword(!viewConfirmPassword)}
 															>
-																{viewConfirmPassword ? (
-																	<Eye />
-																) : (
-																	<EyeOff />
-																)}
+																{viewConfirmPassword ? <Eye /> : <EyeOff />}
 															</button>
 														}
 														name="confirm-password"
 														label="Confirm Password"
-														type={
-															viewConfirmPassword
-																? "text"
-																: "password"
-														}
+														type={viewConfirmPassword ? "text" : "password"}
 														autoComplete="confirm-password"
 													/>
 												</>
@@ -368,9 +313,7 @@ export function UserManagement({
 													name="avatarUrl"
 													label="Avatar URL"
 													placeholder="https://example.com/avatar.jpg"
-													defaultValue={
-														active.avatar_url || ""
-													}
+													defaultValue={active.avatar_url || ""}
 												/>
 											)}
 										</div>
@@ -378,22 +321,12 @@ export function UserManagement({
 								</div>
 								<div className="flex justify-end items-center p-4 gap-2">
 									{active.id !== "new" && (
-										<Button
-											onPress={clickDeleteUser}
-											isLoading={loading}
-											color="danger"
-										>
+										<Button onPress={clickDeleteUser} isLoading={loading} color="danger">
 											Delete
 										</Button>
 									)}
-									<Button
-										isLoading={loading}
-										type="submit"
-										color="success"
-									>
-										{active.id !== "new"
-											? "Save Changes"
-											: "Create User"}
+									<Button isLoading={loading} type="submit" color="success">
+										{active.id !== "new" ? "Save Changes" : "Create User"}
 									</Button>
 								</div>
 							</Form>
@@ -412,31 +345,21 @@ export function UserManagement({
 						<Card className="w-full flex-row justify-between items-center group-hover:bg-neutral-50 dark:group-hover:bg-neutral-800">
 							<CardHeader className="w-fit flex items-center">
 								{user.avatar_url ? (
-									<img
-										src={user.avatar_url}
-										alt={user.full_name || "User"}
-										className="w-8 h-8 rounded-full mr-3"
-									/>
+									<img src={user.avatar_url} alt={user.full_name || "User"} className="w-8 h-8 rounded-full mr-3" />
 								) : (
 									<div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 mr-3 flex items-center justify-center">
 										<IconUser size={16} />
 									</div>
 								)}
 								<div>
-									<motion.h3
-										layoutId={`title-${user.id}-${id}`}
-										className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left"
-									>
-										<b>{user.full_name}</b> -{" "}
-										{user.position}
+									<motion.h3 layoutId={`title-${user.id}-${id}`} className="font-medium text-foreground text-center md:text-left">
+										<b>{user.full_name}</b>
+										<span className="text-default-500"> - {user.position}</span>
 									</motion.h3>
 								</div>
 							</CardHeader>
 
-							<Button
-								isIconOnly
-								className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400"
-							>
+							<Button isIconOnly className="pointer-events-none group-hover:bg-neutral-200 dark:group-hover:bg-neutral-400">
 								<IconEdit />
 							</Button>
 						</Card>
@@ -449,24 +372,13 @@ export function UserManagement({
 					{(onClose) => (
 						<>
 							<ModalHeader className="flex flex-col gap-1">
-								Are you sure you want to delete the user{" "}
-								{typeof active === "object" &&
-									`${active?.full_name}`}
-								?
+								Are you sure you want to delete the user {typeof active === "object" && `${active?.full_name}`}?
 							</ModalHeader>
 							<ModalBody>
-								<p>
-									This action cannot be undone. The user will
-									be permanently deleted from the system.
-								</p>
+								<p>This action cannot be undone. The user will be permanently deleted from the system.</p>
 							</ModalBody>
 							<ModalFooter>
-								<Button
-									color="danger"
-									variant="light"
-									isLoading={loading}
-									onPress={onClose}
-								>
+								<Button color="danger" variant="light" isLoading={loading} onPress={onClose}>
 									Cancel
 								</Button>
 								<Button

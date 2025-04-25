@@ -22,16 +22,13 @@ export type TaskWithDetails = Task & {
 	// Note: task_labels junction table data is implicitly handled via the labels array
 };
 
-export type TaskSummary = Omit<Task, "created_at" | "created_by"> & {
+export type TaskSummary = Task & {
 	labels: Label[]; // Direct array of Label objects
 };
 
 // --- Helper Function for Logging Changes ---
 
-function generateChangeDetails(
-	oldData: Partial<Task>,
-	newData: Partial<Task>
-): Json | null {
+function generateChangeDetails(oldData: Partial<Task>, newData: Partial<Task>): Json | null {
 	const changes: Record<
 		string,
 		{
@@ -40,11 +37,7 @@ function generateChangeDetails(
 		}
 	> = {};
 	for (const key in newData) {
-		if (
-			Object.prototype.hasOwnProperty.call(newData, key) &&
-			key !== "id" &&
-			key !== "created_at"
-		) {
+		if (Object.prototype.hasOwnProperty.call(newData, key) && key !== "id" && key !== "created_at") {
 			const newValue = newData[key as keyof Task];
 			const oldValue = oldData[key as keyof Task];
 			// Basic comparison (doesn't handle deep objects well, adjust if needed)
@@ -63,21 +56,14 @@ function generateChangeDetails(
  * @param taskData Data for the new task
  * @param userId ID of the user performing the action (for logging)
  */
-export async function createTaskWithActivity(
-	taskData: TaskInsert
-): Promise<Task> {
+export async function createTaskWithActivity(taskData: TaskInsert): Promise<Task> {
 	const supabase = createClient();
 	const user = await supabase.auth.getUser(); // Get the current user session
-	if (!user?.data?.user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user?.data?.user) throw new Error("Supabase session not found. User must be logged in.");
 	if (!taskData.created_by) taskData.created_by = user.data.user.id; // Ensure created_by is set
 	if (!taskData.created_at) taskData.created_at = new Date().toISOString(); // Ensure created_at is set
 
-	const { data: newTask, error } = await supabase
-		.from("tasks")
-		.insert(taskData)
-		.select()
-		.single();
+	const { data: newTask, error } = await supabase.from("tasks").insert(taskData).select().single();
 
 	if (error) {
 		console.error("Error creating task:", error);
@@ -93,9 +79,7 @@ export async function createTaskWithActivity(
 		user_id: user.data.user.id,
 		task_id: newTask.id,
 		details: { title: newTask.title }, // Log basic info
-	}).catch((logError) =>
-		console.error("Failed to log task creation:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log task creation:", logError));
 
 	return newTask;
 }
@@ -104,9 +88,7 @@ export async function createTaskWithActivity(
  * READ Task by ID with related details (Labels, Comments, Attachments, Users, Project)
  * @param taskId The ID of the task to fetch
  */
-export async function getTaskByIdWithDetails(
-	taskId: string
-): Promise<TaskWithDetails | null> {
+export async function getTaskByIdWithDetails(taskId: string): Promise<TaskWithDetails | null> {
 	const { data, error } = await createClient()
 		.from("tasks")
 		.select(
@@ -145,59 +127,32 @@ export async function getTaskByIdWithDetails(
  * READ Tasks with filtering and optional related details
  * @param options Filtering and selection options
  */
-export async function getTaskSummary(
-	projectId: string
-): Promise<TaskSummary[]> {
+export async function getTaskSummary(projectId: string): Promise<TaskSummary[]> {
 	// Return type depends on includeDetails
 
-	const { data, error } = await createClient()
-		.from("tasks")
-		.select(`*`)
-		.eq("project_id", projectId)
-		.order("created_at", { ascending: false }); // Default sort
+	const { data, error } = await createClient().from("tasks").select(`*`).eq("project_id", projectId).order("created_at", { ascending: false }); // Default sort
 
 	if (error) {
 		console.error("Error fetching filtered tasks:", error);
 		throw error;
 	}
 
-	// group labels of same task
-	// const groupedData = data?.reduce((acc: TaskSummary[], task) => {
-	// 	const existingTask = acc.find((t) => t.id === task.task_id);
-	// 	if (existingTask) {
-	// 		existingTask.labels.push({
-	// 			id: task.label_id || "",
-	// 			name: task.label_name || "",
-	// 			color: task.label_color || "",
-	// 			project_id: task.project_id || "",
-	// 		});
-	// 	} else {
-	// 		acc.push({
-	// 			title: task.title || "",
-	// 			id: task.task_id || "",
-	// 			description: task.description || "",
-	// 			status: task.status || "",
-	// 			priority: task.priority || 0,
-	// 			start_date: task.start_date || null,
-	// 			due_date: task.due_date || null,
-	// 			assigned_to: task.assigned_to || null,
-	// 			project_id: task.project_id || "",
-	// 			parent_task_id: task.parent_task_id || null,
-	// 			percent: task.percent || 0,
-	// 			labels: [
-	// 				{
-	// 					id: task.label_id || "",
-	// 					name: task.label_name || "",
-	// 					color: task.label_color || "",
-	// 					project_id: task.project_id || "",
-	// 				},
-	// 			],
-	// 		});
-	// 	}
-	// 	return acc;
-	// }, [] as TaskSummary[]);
+	// fetch labels for each task
+	const tasksWithLabels = await Promise.all(
+		data?.map(async (task) => {
+			const { data: labels, error: labelError } = await createClient().from("task_labels").select("labels(*)").eq("task_id", task.id);
+			if (labelError) {
+				console.error("Error fetching labels for task:", labelError);
+				throw labelError;
+			}
+			return {
+				...task,
+				labels: labels?.map((tl) => tl.labels) || [], // Extract labels from junction
+			};
+		}) || []
+	);
 
-	return data as unknown as TaskSummary[]; // Cast needed due to complex select + processing
+	return tasksWithLabels;
 }
 
 /**
@@ -206,23 +161,15 @@ export async function getTaskSummary(
  * @param taskData Data to update
  * @param userId ID of the user performing the action (for logging)
  */
-export async function updateTaskWithActivity(
-	taskId: string,
-	taskData: Task
-): Promise<Task> {
+export async function updateTaskWithActivity(taskId: string, taskData: Task): Promise<Task> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
 	// 1. Fetch current task state for comparison (optional but good for detailed logging)
 	let oldTaskData: Partial<Task> = {};
 	try {
-		const { data: currentTask, error: fetchError } = await supabase
-			.from("tasks")
-			.select("*")
-			.eq("id", taskId)
-			.single();
+		const { data: currentTask, error: fetchError } = await supabase.from("tasks").select("*").eq("id", taskId).single();
 		if (fetchError && fetchError.code !== "PGRST116") throw fetchError;
 		if (currentTask) oldTaskData = currentTask;
 	} catch (err) {
@@ -231,12 +178,7 @@ export async function updateTaskWithActivity(
 	}
 
 	// 2. Perform the update
-	const { data: updatedTask, error: updateError } = await supabase
-		.from("tasks")
-		.update(taskData)
-		.eq("id", taskId)
-		.select()
-		.single();
+	const { data: updatedTask, error: updateError } = await supabase.from("tasks").update(taskData).eq("id", taskId).select().single();
 
 	if (updateError) {
 		console.error("Error updating task:", updateError);
@@ -254,9 +196,7 @@ export async function updateTaskWithActivity(
 			user_id: user.id,
 			task_id: taskId,
 			details: changes,
-		}).catch((logError) =>
-			console.error("Failed to log task update:", logError)
-		);
+		}).catch((logError) => console.error("Failed to log task update:", logError));
 	}
 
 	return updatedTask;
@@ -269,17 +209,12 @@ export async function updateTaskWithActivity(
 export async function deleteTaskWithActivity(taskId: string): Promise<void> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
 	// Optional: Fetch task details before deleting for logging purposes
 	let deletedTaskTitle = `Task ID: ${taskId}`;
 	try {
-		const { data: taskToDelete } = await supabase
-			.from("tasks")
-			.select("id, title")
-			.eq("id", taskId)
-			.single();
+		const { data: taskToDelete } = await supabase.from("tasks").select("id, title").eq("id", taskId).single();
 		if (taskToDelete) deletedTaskTitle = taskToDelete.title;
 	} catch (err: unknown) {
 		// Ignore if task not found or error fetching
@@ -300,9 +235,7 @@ export async function deleteTaskWithActivity(taskId: string): Promise<void> {
 		user_id: user.id,
 		task_id: taskId, // Log the ID even if task is gone
 		details: { title: deletedTaskTitle }, // Log title if fetched
-	}).catch((logError) =>
-		console.error("Failed to log task deletion:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log task deletion:", logError));
 }
 
 // --- Task Relationship Management (Labels, Comments, Attachments) ---
@@ -310,18 +243,12 @@ export async function deleteTaskWithActivity(taskId: string): Promise<void> {
 /**
  * Assign a Label to a Task and Log Activity
  */
-export async function assignLabelToTask(
-	taskId: string,
-	labelId: string
-): Promise<void> {
+export async function assignLabelToTask(taskId: string, labelId: string): Promise<void> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
-	const { error } = await supabase
-		.from("task_labels")
-		.insert({ task_id: taskId, label_id: labelId });
+	const { error } = await supabase.from("task_labels").insert({ task_id: taskId, label_id: labelId });
 
 	if (error) {
 		if (error.code === "23505") {
@@ -339,28 +266,18 @@ export async function assignLabelToTask(
 		user_id: user.id,
 		task_id: taskId,
 		details: { label_id: labelId },
-	}).catch((logError) =>
-		console.error("Failed to log label assignment:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log label assignment:", logError));
 }
 
 /**
  * Remove a Label from a Task and Log Activity
  */
-export async function removeLabelFromTask(
-	taskId: string,
-	labelId: string
-): Promise<void> {
+export async function removeLabelFromTask(taskId: string, labelId: string): Promise<void> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
-	const { error } = await supabase
-		.from("task_labels")
-		.delete()
-		.eq("task_id", taskId)
-		.eq("label_id", labelId);
+	const { error } = await supabase.from("task_labels").delete().eq("task_id", taskId).eq("label_id", labelId);
 
 	if (error) {
 		console.error("Error removing label from task:", error);
@@ -373,24 +290,17 @@ export async function removeLabelFromTask(
 		user_id: user.id,
 		task_id: taskId,
 		details: { label_id: labelId },
-	}).catch((logError) =>
-		console.error("Failed to log label removal:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log label removal:", logError));
 }
 
 // --- Task Comments ---
-type TaskCommentInsert =
-	Database["public"]["Tables"]["task_comments"]["Insert"];
-type TaskCommentUpdate =
-	Database["public"]["Tables"]["task_comments"]["Update"];
+type TaskCommentInsert = Database["public"]["Tables"]["task_comments"]["Insert"];
+type TaskCommentUpdate = Database["public"]["Tables"]["task_comments"]["Update"];
 
-export async function addTaskComment(
-	commentData: Omit<TaskCommentInsert, "id" | "created_at">
-): Promise<TaskComment> {
+export async function addTaskComment(commentData: Omit<TaskCommentInsert, "id" | "created_at">): Promise<TaskComment> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
 	commentData.user_id = user.id; // Ensure user_id is set
 
@@ -415,27 +325,17 @@ export async function addTaskComment(
 			comment_id: data.id,
 			content_preview: data.content?.substring(0, 50),
 		}, // Log preview
-	}).catch((logError) =>
-		console.error("Failed to log comment addition:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log comment addition:", logError));
 
 	return data;
 }
 
-export async function updateTaskComment(
-	commentId: string,
-	commentData: TaskCommentUpdate
-): Promise<TaskComment> {
+export async function updateTaskComment(commentId: string, commentData: TaskCommentUpdate): Promise<TaskComment> {
 	// Add permission check: Ensure userId matches comment's user_id before allowing update
 	// const { data: existingComment } = await createClient().from('task_comments').select('user_id').eq('id', commentId).single();
 	// if (!existingComment || existingComment.user_id !== userId) throw new Error("Permission denied to update comment.");
 
-	const { data, error } = await createClient()
-		.from("task_comments")
-		.update(commentData)
-		.eq("id", commentId)
-		.select("*, users(id)")
-		.single();
+	const { data, error } = await createClient().from("task_comments").update(commentData).eq("id", commentId).select("*, users(id)").single();
 
 	if (error) {
 		console.error("Error updating task comment:", error);
@@ -452,25 +352,15 @@ export async function updateTaskComment(
 export async function deleteTaskComment(commentId: string): Promise<void> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
 	// Add permission check: Ensure userId matches comment's user_id or user has admin rights
-	const { data: commentInfo, error: fetchErr } = await supabase
-		.from("task_comments")
-		.select("id, task_id, user_id")
-		.eq("id", commentId)
-		.single();
+	const { data: commentInfo, error: fetchErr } = await supabase.from("task_comments").select("id, task_id, user_id").eq("id", commentId).single();
 
-	if (fetchErr || !commentInfo)
-		throw new Error("Comment not found or error fetching.");
-	if (commentInfo.user_id !== user.id)
-		throw new Error("Permission denied to delete comment.");
+	if (fetchErr || !commentInfo) throw new Error("Comment not found or error fetching.");
+	if (commentInfo.user_id !== user.id) throw new Error("Permission denied to delete comment.");
 
-	const { error } = await supabase
-		.from("task_comments")
-		.delete()
-		.eq("id", commentId);
+	const { error } = await supabase.from("task_comments").delete().eq("id", commentId);
 
 	if (error) {
 		console.error("Error deleting task comment:", error);
@@ -483,26 +373,19 @@ export async function deleteTaskComment(commentId: string): Promise<void> {
 		user_id: user.id,
 		task_id: commentInfo.task_id, // Need task_id from fetched comment
 		details: { comment_id: commentId },
-	}).catch((logError) =>
-		console.error("Failed to log comment deletion:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log comment deletion:", logError));
 }
 
 // --- Task Attachments ---
-type TaskAttachmentInsert =
-	Database["public"]["Tables"]["task_attachments"]["Insert"];
+type TaskAttachmentInsert = Database["public"]["Tables"]["task_attachments"]["Insert"];
 
 // Note: Deleting attachments often requires deleting from Storage too!
 // TODO: Upload attachments to Supabase Storage and get URL for the attachment record
-export async function addTaskAttachment(
-	attachmentData: TaskAttachmentInsert
-): Promise<TaskAttachment> {
+export async function addTaskAttachment(attachmentData: TaskAttachmentInsert): Promise<TaskAttachment> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
-	if (!user.id || !attachmentData.task_id || !attachmentData.url)
-		throw new Error("User ID, Task ID, and URL required for attachment.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
+	if (!user.id || !attachmentData.task_id || !attachmentData.url) throw new Error("User ID, Task ID, and URL required for attachment.");
 	attachmentData.uploaded_by = user.id;
 
 	const { data, error } = await supabase
@@ -523,30 +406,20 @@ export async function addTaskAttachment(
 		user_id: user.id,
 		task_id: attachmentData.task_id,
 		details: { attachment_id: data.id, url: data.url },
-	}).catch((logError) =>
-		console.error("Failed to log attachment addition:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log attachment addition:", logError));
 
 	return data;
 }
 
-export async function deleteTaskAttachment(
-	attachmentId: string
-): Promise<void> {
+export async function deleteTaskAttachment(attachmentId: string): Promise<void> {
 	const supabase = createClient();
 	const user = (await supabase.auth.getUser()).data.user; // Get the current user session
-	if (!user)
-		throw new Error("Supabase session not found. User must be logged in.");
+	if (!user) throw new Error("Supabase session not found. User must be logged in.");
 
 	// 1. Fetch attachment details (including URL and task_id for logging/storage deletion)
-	const { data: attachmentInfo, error: fetchErr } = await supabase
-		.from("task_attachments")
-		.select("*")
-		.eq("id", attachmentId)
-		.single();
+	const { data: attachmentInfo, error: fetchErr } = await supabase.from("task_attachments").select("*").eq("id", attachmentId).single();
 
-	if (fetchErr || !attachmentInfo)
-		throw new Error("Attachment not found or error fetching.");
+	if (fetchErr || !attachmentInfo) throw new Error("Attachment not found or error fetching.");
 	// Add permission check if needed (e.g., only uploader or project members can delete)
 	// if (attachmentInfo.uploaded_by !== userId && !isProjectMember(userId, taskId)) throw new Error("Permission denied.");
 
@@ -559,38 +432,23 @@ export async function deleteTaskAttachment(
 			// e.g., /storage/v1/object/public/bucket_name/file_path.jpg
 			const bucketName = pathSegments[4];
 			const filePath = pathSegments.slice(5).join("/");
-			console.log(
-				`Attempting to delete from storage: bucket=${bucketName}, path=${filePath}`
-			);
-			const { error: storageError } = await supabase.storage
-				.from(bucketName)
-				.remove([filePath]);
+			console.log(`Attempting to delete from storage: bucket=${bucketName}, path=${filePath}`);
+			const { error: storageError } = await supabase.storage.from(bucketName).remove([filePath]);
 			if (storageError) {
-				console.error(
-					"Error deleting file from storage:",
-					storageError
-				);
+				console.error("Error deleting file from storage:", storageError);
 				// Decide whether to proceed with deleting the DB record if storage deletion fails
 				// throw new Error(`Failed to delete file from storage: ${storageError.message}`);
 			}
 		} else {
-			console.warn(
-				`Could not parse file path from URL: ${attachmentInfo.url}`
-			);
+			console.warn(`Could not parse file path from URL: ${attachmentInfo.url}`);
 		}
 	} catch (urlError) {
-		console.error(
-			`Invalid attachment URL format: ${attachmentInfo.url}`,
-			urlError
-		);
+		console.error(`Invalid attachment URL format: ${attachmentInfo.url}`, urlError);
 		// Decide if you should stop or continue to delete DB record
 	}
 
 	// 3. Delete the database record
-	const { error: deleteError } = await supabase
-		.from("task_attachments")
-		.delete()
-		.eq("id", attachmentId);
+	const { error: deleteError } = await supabase.from("task_attachments").delete().eq("id", attachmentId);
 
 	if (deleteError) {
 		console.error("Error deleting task attachment record:", deleteError);
@@ -603,7 +461,5 @@ export async function deleteTaskAttachment(
 		user_id: user.id,
 		task_id: attachmentInfo.task_id, // Need task_id from fetched attachment
 		details: { attachment_id: attachmentId, url: attachmentInfo.url },
-	}).catch((logError) =>
-		console.error("Failed to log attachment deletion:", logError)
-	);
+	}).catch((logError) => console.error("Failed to log attachment deletion:", logError));
 }

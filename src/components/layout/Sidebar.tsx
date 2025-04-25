@@ -2,25 +2,12 @@
 import { getUserById } from "@/lib/db";
 import { isMeetingToday, updateMeetingToday } from "@/lib/db";
 import { createClient } from "@/utils/supabase/client";
-import {
-	IconArrowLeft,
-	IconBrandTabler,
-	IconCalendarCheck,
-	IconSettings,
-	IconUserBolt,
-} from "@tabler/icons-react";
+import { IconArrowLeft, IconBrandTabler, IconCalendarCheck, IconSettings, IconUserBolt } from "@tabler/icons-react";
 import { User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import {
-	Sidebar,
-	SidebarBody,
-	SidebarAttendance,
-	SidebarLink,
-	SidebarThemeSwitcher,
-	Links,
-} from "../ui/sidebar";
+import { Sidebar, SidebarBody, SidebarAttendance, SidebarLink, SidebarThemeSwitcher, Links } from "../ui/sidebar";
 
 interface SidebarLayoutProps {
 	children: React.ReactNode;
@@ -32,43 +19,31 @@ export function SidebarLayout({ subdomain, children }: SidebarLayoutProps) {
 		{
 			label: "Dashboard",
 			href: "/",
-			icon: (
-				<IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-			),
+			icon: <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
 		},
 
-		...(subdomain === "admin"
-			? ([
-					{
-						label: "Attendance Report",
-						href: "/attendance",
-						icon: (
-							<IconCalendarCheck className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-						),
-					},
-			  ] as Links[])
-			: []),
+		...(subdomain === "admin" ? ([] as Links[]) : []),
+
+		{
+			label: "Attendance Report",
+			href: "/attendance",
+			icon: <IconCalendarCheck className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
+		},
 
 		{
 			label: "Profile",
 			href: "#",
-			icon: (
-				<IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-			),
+			icon: <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
 		},
 		{
 			label: "Settings",
 			href: "/settings",
-			icon: (
-				<IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-			),
+			icon: <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
 		},
 		{
 			label: "Logout",
 			href: "#",
-			icon: (
-				<IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-			),
+			icon: <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
 		},
 	];
 	const [open, setOpen] = useState(false);
@@ -111,10 +86,6 @@ export function SidebarLayout({ subdomain, children }: SidebarLayoutProps) {
 		fetchUser();
 	}, []);
 
-	useEffect(() => {
-		console.log(meetingToday);
-	}, [meetingToday]);
-
 	return (
 		<div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-dvh">
 			<Sidebar open={open} setOpen={setOpen}>
@@ -133,51 +104,27 @@ export function SidebarLayout({ subdomain, children }: SidebarLayoutProps) {
 							user &&
 							(meetingToday === null ? (
 								<div className="flex gap-2">
-									<SidebarAttendance
-										className="bg-red-800"
-										loading={loading}
-										onPress={() =>
-											handleMeetingToday(false)
-										}
-									>
+									<SidebarAttendance className="bg-red-800" loading={loading} onPress={() => handleMeetingToday(false)}>
 										Can Not Attend
 									</SidebarAttendance>
-									<SidebarAttendance
-										className="bg-green-700"
-										loading={loading}
-										onPress={() => handleMeetingToday(true)}
-									>
+									<SidebarAttendance className="bg-green-700" loading={loading} onPress={() => handleMeetingToday(true)}>
 										Attending Today
 									</SidebarAttendance>
 								</div>
 							) : (
 								<SidebarAttendance
-									className={
-										meetingToday
-											? "bg-green-700"
-											: "bg-red-800"
-									}
+									className={meetingToday ? "bg-green-700" : "bg-red-800"}
 									loading={loading}
-									onPress={() =>
-										handleMeetingToday(!meetingToday)
-									}
+									onPress={() => handleMeetingToday(!meetingToday)}
 								>
-									{meetingToday
-										? "Attending Meeting"
-										: "Not Attending Meeting"}
+									{meetingToday ? "Attending Meeting" : "Not Attending Meeting"}
 								</SidebarAttendance>
 							))}
 						<SidebarLink
 							link={{
-								label: initialLoading
-									? ""
-									: user
-									? user?.name || "User"
-									: "Please Log In",
+								label: initialLoading ? "" : user ? user?.name || "User" : "Please Log In",
 								href: "#",
-								icon: (
-									<User className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-								),
+								icon: <User className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
 							}}
 						/>
 					</div>
@@ -192,16 +139,9 @@ export function SidebarLayout({ subdomain, children }: SidebarLayoutProps) {
 
 export const Logo = () => {
 	return (
-		<Link
-			href="#"
-			className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-		>
+		<Link href="#" className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
 			<div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-			<motion.span
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				className="font-medium whitespace-pre text-black dark:text-white"
-			>
+			<motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-medium whitespace-pre text-black dark:text-white">
 				Obelithe Studios
 			</motion.span>
 		</Link>
@@ -209,10 +149,7 @@ export const Logo = () => {
 };
 export const LogoIcon = () => {
 	return (
-		<Link
-			href="#"
-			className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-		>
+		<Link href="#" className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black">
 			<div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
 		</Link>
 	);

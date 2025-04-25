@@ -6,7 +6,7 @@ import {
 } from "@heroui/react";
 import { Check, X } from "lucide-react";
 
-type AutocompleteItemType = {
+export type AutocompleteItemType = {
 	name: string; // Name of the item
 	id: string; // Unique identifier for the item
 };

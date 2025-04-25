@@ -1,6 +1,6 @@
 "use client";
-import { UserAttendance } from "@/components/admin/attendance/UserAttendance";
-import { Attendance, getAttendanceReport } from "@/lib/db";
+import { UserAttendance, UserAttendanceStatus } from "@/components/admin/attendance/UserAttendance";
+import { Attendance, getAttendanceReport, getSelfUser } from "@/lib/db";
 import { Database } from "@/types/database.types";
 import { Chip, DatePicker, Skeleton } from "@heroui/react";
 import { DateValue, parseDate } from "@internationalized/date";
@@ -22,7 +22,11 @@ export type AttendanceHistory = {
 	status: string;
 }[];
 
-export function AttendanceReport() {
+interface AttendanceReportProps {
+	subdomain: string;
+}
+
+export function AttendanceReport({ subdomain }: AttendanceReportProps) {
 	const [isLoading, setIsLoading] = useState(true);
 
 	const today = parseDate(new Date().toISOString().split("T")[0]);
@@ -30,12 +34,11 @@ export function AttendanceReport() {
 	const [startDate, setStartDate] = useState<DateValue | null>(today);
 	const [selectedDate, setSelectedDate] = useState<DateValue | null>(today);
 	const [attendanceData, setAttendanceData] = useState<Attendance[]>([]);
-	const [selectedMeeting, setSelectedMeeting] = useState<Attendance | null>(
-		null
-	);
-	const [userStats, setUserStats] = useState<Record<string, AttendanceStats>>(
-		{}
-	);
+	const [selectedMeeting, setSelectedMeeting] = useState<Attendance | null>(null);
+	const [userStats, setUserStats] = useState<Record<string, AttendanceStats>>({});
+	const [myUser, setMyUser] = useState<Database["public"]["Tables"]["users"]["Row"] | null>(null);
+
+	const firstName = `${myUser?.full_name.split(" ")[0]}'s` || "Your";
 
 	useEffect(() => {
 		loadData(today);
@@ -44,9 +47,9 @@ export function AttendanceReport() {
 	const loadData = async (startDate: DateValue | null) => {
 		setIsLoading(true);
 		try {
-			const data = await getAttendanceReport(
-				startDate?.toDate("Asia/Kolkata") || new Date()
-			);
+			setMyUser(await getSelfUser());
+
+			const data = await getAttendanceReport(startDate?.toDate("Asia/Kolkata") || new Date(), subdomain === "admin");
 			setAttendanceData(data);
 
 			// Set today's meeting as selected by default
@@ -84,10 +87,7 @@ export function AttendanceReport() {
 					stats[user.id].attended++;
 					stats[user.id].user = user;
 					stats[user.id].currentStreak++;
-					stats[user.id].streak = Math.max(
-						stats[user.id].streak,
-						stats[user.id].currentStreak
-					);
+					stats[user.id].streak = Math.max(stats[user.id].streak, stats[user.id].currentStreak);
 				});
 
 				meeting.not_attending.forEach((user) => {
@@ -105,14 +105,8 @@ export function AttendanceReport() {
 
 			// Calculate attendance rates
 			Object.keys(stats).forEach((userId) => {
-				const total =
-					stats[userId].attended +
-					stats[userId].missed +
-					stats[userId].undecided;
-				stats[userId].attendanceRate =
-					total > 0
-						? Math.round((stats[userId].attended / total) * 100)
-						: 0;
+				const total = stats[userId].attended + stats[userId].missed + stats[userId].undecided;
+				stats[userId].attendanceRate = total > 0 ? Math.round((stats[userId].attended / total) * 100) : 0;
 			});
 
 			setUserStats(stats);
@@ -128,9 +122,7 @@ export function AttendanceReport() {
 		if (!value) return;
 
 		// Find the meeting for the selected date
-		const meeting = attendanceData.find(
-			(m) => m.meeting_date === value.toString().split("T")[0]
-		);
+		const meeting = attendanceData.find((m) => m.meeting_date === value.toString().split("T")[0]);
 		setSelectedMeeting(meeting || null);
 	};
 
@@ -166,15 +158,11 @@ export function AttendanceReport() {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5 }}
 			>
-				Team Attendance Report
+				{subdomain === "admin" ? "Team's" : firstName}
+				{" Attendance Report"}
 			</motion.h1>
 
-			<motion.div
-				className="mb-4 flex gap-4"
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.5 }}
-			>
+			<motion.div className="mb-4 flex gap-4" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
 				<DatePicker
 					label="Select start date"
 					value={startDate}
@@ -194,24 +182,17 @@ export function AttendanceReport() {
 				/>
 			</motion.div>
 
-			<motion.div
-				className="mb-4"
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.5 }}
-			>
+			<motion.div className="mb-4" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
 				{/* Today's meeting */}
-				<div className="bg-content2 p-4 rounded-lg shadow">
+				<div className={`bg-content2 p-4 rounded-lg shadow ${subdomain === "admin" ? "space-y-4" : "flex gap-4 flex-wrap"}`}>
 					<motion.h2
-						className="text-xl font-semibold mb-4"
+						className="text-xl font-semibold"
 						initial={{ opacity: 0, y: -20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5 }}
 					>
 						{selectedMeeting
-							? `Attendance for ${new Date(
-									selectedMeeting.meeting_date
-							  ).toLocaleDateString(undefined, {
+							? `Attendance for ${new Date(selectedMeeting.meeting_date).toLocaleDateString(undefined, {
 									weekday: "long",
 									year: "numeric",
 									month: "long",
@@ -219,24 +200,36 @@ export function AttendanceReport() {
 							  })}`
 							: "No meeting data available for this date"}
 					</motion.h2>
-					<div className="flex flex-wrap gap-4">
-						<Skeleton isLoaded={!isLoading}>
-							<Chip size="lg" color="success" variant="flat">
-								Attending: {selectedMeeting?.attending.length}
-							</Chip>
-						</Skeleton>
-						<Skeleton isLoaded={!isLoading}>
-							<Chip size="lg" color="danger" variant="flat">
-								Not Attending:{" "}
-								{selectedMeeting?.not_attending.length}
-							</Chip>
-						</Skeleton>
-						<Skeleton isLoaded={!isLoading}>
-							<Chip size="lg" color="warning" variant="flat">
-								Undecided: {selectedMeeting?.undecided.length}
-							</Chip>
-						</Skeleton>
-					</div>
+					{subdomain === "admin" ? (
+						<div className="flex flex-wrap gap-4">
+							<Skeleton isLoaded={!isLoading}>
+								<Chip size="lg" color="success" variant="flat">
+									Attending: {selectedMeeting?.attending.length}
+								</Chip>
+							</Skeleton>
+							<Skeleton isLoaded={!isLoading}>
+								<Chip size="lg" color="danger" variant="flat">
+									Not Attending: {selectedMeeting?.not_attending.length}
+								</Chip>
+							</Skeleton>
+							<Skeleton isLoaded={!isLoading}>
+								<Chip size="lg" color="warning" variant="flat">
+									Undecided: {selectedMeeting?.undecided.length}
+								</Chip>
+							</Skeleton>
+						</div>
+					) : (
+						myUser &&
+						selectedMeeting && (
+							<UserAttendanceStatus
+								userId={myUser.id}
+								meeting={selectedMeeting}
+								isLoading={isLoading}
+								onPress={() => {}}
+								showPopover={false}
+							/>
+						)
+					)}
 				</div>
 			</motion.div>
 
@@ -247,7 +240,7 @@ export function AttendanceReport() {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 				>
-					Team members: {Object.keys(userStats).length}
+					{subdomain === "admin" ? `Team members: ${Object.keys(userStats).length}` : "Calendar"}
 				</motion.h2>
 
 				{/* Members */}
@@ -256,9 +249,7 @@ export function AttendanceReport() {
 						<UserAttendance
 							key={stats.user?.id}
 							stats={stats}
-							history={getUserAttendanceHistory(
-								stats.user?.id || ""
-							)}
+							history={getUserAttendanceHistory(stats.user?.id || "")}
 							isLoading={isLoading}
 							selectedDate={selectedDate}
 							selectedMeeting={selectedMeeting}

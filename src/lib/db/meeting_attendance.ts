@@ -4,8 +4,7 @@ import { createClient } from "@/utils/supabase/client";
 // type Attendance = Database["public"]["Tables"]["meeting_attendance"]["Row"];
 // type User = Database["public"]["Tables"]["users"]["Row"];
 
-export type Attendance =
-	Database["public"]["Functions"]["get_attendance"]["Returns"][0];
+export type Attendance = Database["public"]["Functions"]["get_attendance"]["Returns"][0];
 
 export async function isMeetingToday(): Promise<boolean | null> {
 	const today = new Date().toISOString().split("T")[0];
@@ -36,11 +35,7 @@ export async function updateMeetingToday(meeting: boolean) {
 	const supabase = createClient();
 
 	// match date
-	const { data, error } = await supabase
-		.from("meeting_attendance")
-		.upsert({ date: today, attending: meeting })
-		.select("*")
-		.single();
+	const { data, error } = await supabase.from("meeting_attendance").upsert({ date: today, attending: meeting }).select("*").single();
 
 	if (error) {
 		console.error("Error setting meeting:", error);
@@ -99,7 +94,7 @@ export async function getAllMeetingUsers(): Promise<Attendance> {
 	return data as Attendance; // Return the first row as attendance data
 }
 
-export async function getAttendanceReport(date: Date): Promise<Attendance[]> {
+export async function getAttendanceReport(date: Date, isAdmin: boolean): Promise<Attendance[]> {
 	const supabase = createClient();
 
 	// get all attendance for the user after the date
@@ -112,5 +107,22 @@ export async function getAttendanceReport(date: Date): Promise<Attendance[]> {
 		return [];
 	}
 
-	return data; // Return the attendance report for the user
+	if (!data) return []; // No attendance found
+
+	let attendanceData = data as Attendance[];
+
+	// only retrieve the attendance for the user if not an admin
+	if (!isAdmin) {
+		const { user } = (await supabase.auth.getUser()).data;
+		if (!user) return []; // User not logged in
+
+		attendanceData = data.map((attendance) => {
+			attendance.attending = attendance.attending.filter((u) => u.id === user.id);
+			attendance.not_attending = attendance.not_attending.filter((u) => u.id === user.id);
+			attendance.undecided = attendance.undecided.filter((u) => u.id === user.id);
+			return attendance;
+		});
+	}
+
+	return attendanceData; // Return the attendance report for the user
 }

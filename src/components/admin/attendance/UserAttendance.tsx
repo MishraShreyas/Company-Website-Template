@@ -1,7 +1,4 @@
-import {
-	AttendanceHistory,
-	AttendanceStats,
-} from "@/components/admin/attendance/AttendanceReport";
+import { AttendanceHistory, AttendanceStats } from "@/components/admin/attendance/AttendanceReport";
 import { UserAttendanceCalendar } from "@/components/admin/attendance/UserAttendanceCalendar";
 import { Attendance } from "@/lib/db";
 import {
@@ -22,23 +19,25 @@ import {
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-const UserAttendanceStatus = ({
+export const UserAttendanceStatus = ({
 	userId,
 	meeting,
 	isLoading,
 	onPress,
+	showPopover = true,
 }: {
 	userId: string;
 	meeting: Attendance;
 	isLoading: boolean;
 	onPress: () => void;
+	showPopover?: boolean;
 }) => {
 	if (!meeting) return null;
 
 	const props = {
 		isDisabled: isLoading,
-		onClose: onPress,
-		endContent: (
+		onClose: showPopover ? onPress : null,
+		endContent: showPopover && (
 			<PopoverTrigger>
 				<ChevronDown size={15} className="mr-0.5" />
 			</PopoverTrigger>
@@ -76,14 +75,7 @@ interface UserAttendanceProps {
 	handleDateChange: (date: DateValue) => void;
 }
 
-export function UserAttendance({
-	stats,
-	history,
-	isLoading,
-	selectedMeeting,
-	selectedDate,
-	handleDateChange,
-}: UserAttendanceProps) {
+export function UserAttendance({ stats, history, isLoading, selectedMeeting, selectedDate, handleDateChange }: UserAttendanceProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
@@ -96,12 +88,7 @@ export function UserAttendance({
 					name={stats.user?.full_name || ""}
 					description={stats.user?.position || ""}
 				/>
-				<Popover
-					isOpen={isOpen}
-					onOpenChange={setIsOpen}
-					placement="bottom"
-					showArrow
-				>
+				<Popover isOpen={isOpen} onOpenChange={setIsOpen} placement="bottom" showArrow>
 					{/* <PopoverTrigger> */}
 					<UserAttendanceStatus
 						onPress={() => setIsOpen(true)}
@@ -110,10 +97,7 @@ export function UserAttendance({
 						meeting={selectedMeeting!}
 					/>
 					{/* </PopoverTrigger> */}
-					<Listbox
-						aria-label="Actions"
-						onAction={(key) => alert(key)}
-					>
+					<Listbox aria-label="Actions" onAction={(key) => alert(key)}>
 						<ListboxItem color="primary" key="Attending">
 							Attending
 						</ListboxItem>
@@ -121,12 +105,7 @@ export function UserAttendance({
 				</Popover>
 			</CardHeader>
 			<CardBody>
-				<UserAttendanceCalendar
-					history={history}
-					isLoading={isLoading}
-					selectedDate={selectedDate}
-					handleDateChange={handleDateChange}
-				/>
+				<UserAttendanceCalendar history={history} isLoading={isLoading} selectedDate={selectedDate} handleDateChange={handleDateChange} />
 			</CardBody>
 			<CardFooter className="gap-4 flex-wrap">
 				<h4 className="font-semibold mr-8">Attendance Stats</h4>

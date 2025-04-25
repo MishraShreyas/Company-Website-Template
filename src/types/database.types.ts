@@ -1,10 +1,4 @@
-export type Json =
-	| string
-	| number
-	| boolean
-	| null
-	| { [key: string]: Json | undefined }
-	| Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
 	public: {
@@ -987,19 +981,16 @@ export type Database = {
 			};
 			team_members: {
 				Row: {
-					id: string;
 					joined_at: string;
 					team_id: string;
 					user_id: string;
 				};
 				Insert: {
-					id?: string;
 					joined_at?: string;
 					team_id: string;
 					user_id: string;
 				};
 				Update: {
-					id?: string;
 					joined_at?: string;
 					team_id?: string;
 					user_id?: string;
@@ -1253,9 +1244,7 @@ export type Database = {
 					creator_name: string | null;
 					date: string | null;
 					description: string | null;
-					entry_type:
-						| Database["public"]["Enums"]["budget_entry_type"]
-						| null;
+					entry_type: Database["public"]["Enums"]["budget_entry_type"] | null;
 					id: string | null;
 					payer_avatar: string | null;
 					payer_id: string | null;
@@ -1266,13 +1255,11 @@ export type Database = {
 			projects_with_team_view: {
 				Row: {
 					due_date: string | null;
-					priority:
-						| Database["public"]["Enums"]["task_priority"]
-						| null;
+					priority: Database["public"]["Enums"]["task_priority"] | null;
 					project_created_at: string | null;
 					project_creator: string | null;
 					project_descriptions: string | null;
-					project_id: string | null;
+					project_id: string;
 					project_title: string | null;
 					status: Database["public"]["Enums"]["task_status"] | null;
 					team_created_at: string | null;
@@ -1362,15 +1349,9 @@ export type Database = {
 				Args: { target_date: string };
 				Returns: {
 					meeting_date: string;
-					attending: Array<
-						Database["public"]["Tables"]["users"]["Row"]
-					>;
-					not_attending: Array<
-						Database["public"]["Tables"]["users"]["Row"]
-					>;
-					undecided: Array<
-						Database["public"]["Tables"]["users"]["Row"]
-					>;
+					attending: Array<Database["public"]["Tables"]["users"]["Row"]>;
+					not_attending: Array<Database["public"]["Tables"]["users"]["Row"]>;
+					undecided: Array<Database["public"]["Tables"]["users"]["Row"]>;
 				}[];
 			};
 			is_admin: {
@@ -1393,14 +1374,11 @@ export type Database = {
 type DefaultSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
-	DefaultSchemaTableNameOrOptions extends
-		| keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-		| { schema: keyof Database },
+	DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"]) | { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
 		schema: keyof Database;
 	}
-		? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-				Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+		? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] & Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
 		: never = never
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
 	? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
@@ -1409,10 +1387,8 @@ export type Tables<
 	  }
 		? R
 		: never
-	: DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-			DefaultSchema["Views"])
-	? (DefaultSchema["Tables"] &
-			DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+	: DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+	? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
 			Row: infer R;
 	  }
 		? R
@@ -1420,9 +1396,7 @@ export type Tables<
 	: never;
 
 export type TablesInsert<
-	DefaultSchemaTableNameOrOptions extends
-		| keyof DefaultSchema["Tables"]
-		| { schema: keyof Database },
+	DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
 		schema: keyof Database;
 	}
@@ -1443,9 +1417,7 @@ export type TablesInsert<
 	: never;
 
 export type TablesUpdate<
-	DefaultSchemaTableNameOrOptions extends
-		| keyof DefaultSchema["Tables"]
-		| { schema: keyof Database },
+	DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof Database },
 	TableName extends DefaultSchemaTableNameOrOptions extends {
 		schema: keyof Database;
 	}
@@ -1466,9 +1438,7 @@ export type TablesUpdate<
 	: never;
 
 export type Enums<
-	DefaultSchemaEnumNameOrOptions extends
-		| keyof DefaultSchema["Enums"]
-		| { schema: keyof Database },
+	DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof Database },
 	EnumName extends DefaultSchemaEnumNameOrOptions extends {
 		schema: keyof Database;
 	}
@@ -1481,9 +1451,7 @@ export type Enums<
 	: never;
 
 export type CompositeTypes<
-	PublicCompositeTypeNameOrOptions extends
-		| keyof DefaultSchema["CompositeTypes"]
-		| { schema: keyof Database },
+	PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"] | { schema: keyof Database },
 	CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
 		schema: keyof Database;
 	}
